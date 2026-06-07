@@ -1,0 +1,6 @@
+{
+  "name": "赛博大屎馆",
+  "description": "赛博大屎馆 (Cyber Poop Museum) - 结合了便签记录、神秘合成、艺术雕像摆盘的高级卢浮宫质感主厨大屎画廊系统。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

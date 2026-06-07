@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #0F0F0F;
+    color: #e4e4e7;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Precise transition fade keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Playfair Display", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-display: "Outfit", sans-serif;
+  
+  --color-art-yellow: #FFD93D;
+  --color-art-red: #FF6B6B;
+  --color-art-blue: #4D96FF;
+  --color-art-green: #6BCB77;
+  --color-art-charcoal: #2B2D42;
+  --color-art-cream: #FFFBEB;
+  --color-art-dark: #0F0F0F;
+}
