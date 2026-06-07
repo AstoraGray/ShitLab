@@ -1,17 +1,5 @@
-import express from "express";
-import path from "path";
-import { createServer as createViteServer } from "vite";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const app = express();
-const PORT = 3000;
-
-app.use(express.json());
-
 // List of standard artistic chemical/scientific synonyms for food words
-const INGREDIENT_ARTISTIC_MAP: { [key: string]: string[] } = {
+export const INGREDIENT_ARTISTIC_MAP: { [key: string]: string[] } = {
   "火锅": ["高烈度沸腾红油", "高压浸渍辣椒素", "牛脂饱和重油组分", "四川盆地超临界重油混悬液", "川渝高密度川麻焦油"],
   "麻辣烫": ["高烈度花椒挥发油", "浸渍高温红油重脂固形物", "多相辛香多酚悬浮组分", "东北流派骨汤乳化牛脂", "热交换黏稠高盐聚合物"],
   "冒菜": ["蜀地无明火浸解重油多酚", "高浓度辣椒素水脂混合乳", "辛热脂肪酸聚集大分子", "川西重味微流体沉淀物"],
@@ -175,8 +163,7 @@ const INGREDIENT_ARTISTIC_MAP: { [key: string]: string[] } = {
   "空": ["虚无空间真空态负能量微粒", "热解二氧化碳游离极轻微分子", "虚空维度的弦共振无序沉淀"]
 };
 
-// Translate normal food items into highly sophisticated, ultra-hilarious art components
-function translateIngredientsToArtWords(allIngredients: string[]): string[] {
+export function translateIngredientsToArtWords(allIngredients: string[]): string[] {
   const resultList: string[] = [];
   const uniqueNormalized = Array.from(new Set(
     allIngredients
@@ -210,8 +197,7 @@ function translateIngredientsToArtWords(allIngredients: string[]): string[] {
   return resultList.slice(0, 8); // Max 8 unique ingredients representation
 }
 
-// Complete offline programmatic art generator with incredible depth
-function generateMasterpieceArtProgrammatically(
+export function generateMasterpieceArtProgrammatically(
   meals: { breakfast: string; lunch: string; dinner: string },
   holdingDays: number,
   heldMealsHistory: any[] = [],
@@ -635,7 +621,7 @@ function generateMasterpieceArtProgrammatically(
     `这是一场在湿润肠腔深处发生并战栗的、精神与内脏极限救赎的视觉投影！艺术家“${artistName}”在极意雕塑厚度之 ${shape === "royal_crown" ? "“皇家皇冠”" : (shape === "alien_ufo" ? "“外星飞碟”" : "“双螺旋”")} 形态中，记录下了由“${primaryLunch}”和“${primaryDinner}”所引发的、几乎痉挛的内脏大回旋${ingestionTimelineDescription}气势汹汹的${currentTextureDiscuss}，在${seasonNames[season]}的万物生长与${timeNames[timeOfDay]}的幽暗转换中，融合生出了流淌着的${currentHybridDescription}，这是一篇令人眩晕、却又无可辩驳的、极具力量的肉身体验赞歌。`,
     
     // 12. 极速前卫速度主义
-    `机器在深处咆哮，大肠在瞬间超频！主厨“${artistName}”用极速前卫的 ${shape === "royal_crown" ? "“皇家皇冠”" : (shape === "alien_ufo" ? "“外星飞碟”" : "“双螺旋”")} 动能几何，完美捕获了新陈代谢在穿过生命重力前那一毫秒的电光速度${ingestionTimelineDescription}几乎未作任何温吞发酵或胆怯陈化，“${primaryBreakfast}”瞬间化作了极具刚性曲度的${currentTextureDiscuss}。在${seasonNames[season]}与${timeNames[timeOfDay]}的极致碰撞之下，外部凝聚的${currentHybridDescription}闪耀着高效率和现代工业的傲岸光华，宣照了对温含旧态的彻底宣战。`
+    `机器在深处咆哮，大肠在瞬间超频！主厨“${artistName}”用极速前卫的 ${shape === "royal_crown" ? "“皇家皇冠”" : (shape === "alien_ufo" ? "“外星飞碟”" : "“双螺旋”")} 动能几何，完美捕获了新陈代谢在穿过生命重力前那一毫秒的电光速度${ingestionTimelineDescription}几乎未作任何温吞发酵或胆怯陈化，“${primaryBreakfast}”瞬间化作了极极具刚性曲度的${currentTextureDiscuss}。在${seasonNames[season]}与${timeNames[timeOfDay]}的极致碰撞之下，外部凝聚的${currentHybridDescription}闪耀着高效率和现代工业的傲岸光华，宣照了对温含旧态的彻底宣战。`
   ];
 
   // Deterministically select the template based on title + shape + texture hash, so the same item keeps its coherent report
@@ -660,49 +646,3 @@ function generateMasterpieceArtProgrammatically(
     rarity
   };
 }
-
-// Complete express backend setup containing ZERO AI packages, purely programmatic synthesis and high-coverage static assets rules
-app.post("/api/synthesize", (req, res) => {
-  try {
-    const { meals, holdingDays, artistName, heldMealsHistory } = req.body;
-    
-    if (!meals) {
-      return res.status(400).json({ error: "Missing meals input" });
-    }
-
-    const compiledArt = generateMasterpieceArtProgrammatically(
-      meals,
-      Number(holdingDays || 0),
-      heldMealsHistory || [],
-      artistName || "momo"
-    );
-
-    return res.json(compiledArt);
-  } catch (error: any) {
-    console.error("Critical: Algorithmic synthesis pipeline error:", error);
-    return res.status(500).json({ error: "Algorithmic synthesis pipeline failed gracefully" });
-  }
-});
-
-// Setup Vite & Server routing
-async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-}
-
-startServer();
