@@ -14,6 +14,12 @@ interface PoopRendererProps {
   visibleSegmentsCount?: number; // 1, 2, or 3
 }
 
+// Simple deterministic pseudorandom generator for high-fidelity stable texture rendering
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+};
+
 export const PoopRenderer: React.FC<PoopRendererProps> = ({
   art,
   className = "",
@@ -58,10 +64,22 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
       wobbleSpeedRef.current *= (1 - c);
       wobbleRef.current += wobbleSpeedRef.current;
 
-      // Canvas dimensions
-      const width = canvas.width;
-      const height = canvas.height;
-      ctx.clearRect(0, 0, width, height);
+      // Device Pixel Ratio scaling for outstanding high resolution on Android & iOS screens
+      const dpr = window.devicePixelRatio || 1;
+      const logicalWidth = 350;
+      const logicalHeight = 320;
+      if (canvas.width !== logicalWidth * dpr || canvas.height !== logicalHeight * dpr) {
+        canvas.width = logicalWidth * dpr;
+        canvas.height = logicalHeight * dpr;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
+      const width = logicalWidth;
+      const height = logicalHeight;
 
       // Determine palette
       const baseColor = art.colorHex || "#8B5A2B";
@@ -111,7 +129,18 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
         const localAge = holdingDays * (1 - segmentFraction);
         
         let texture = baseTexture;
-        if (holdingDays >= 2) {
+        const specialFoodTextures = [
+          "volcanic_lava",
+          "toxic_slime",
+          "cyber_grid",
+          "glittery",
+          "metallic_gold",
+          "crystalline",
+          "rainbow_metallic",
+          "grainy"
+        ];
+        // Only override standard textures (smooth, steaming, etc.) with stony historical items, so precious food textures are fully preserved!
+        if (holdingDays >= 2 && !specialFoodTextures.includes(baseTexture)) {
           if (localAge >= 7) {
             texture = "gilded_relic";
           } else if (localAge >= 5) {
@@ -220,10 +249,12 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
           // Draw tiny freckles / chili pepper seeds
           ctx.fillStyle = accentHex;
           for (let i = 0; i < 15; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * 0.7;
-            const px = x + Math.cos(angle) * rx * dist;
-            const py = y + Math.sin(angle) * ry * dist;
+            const seedX = layerIdx * 100 + i * 2;
+            const seedY = layerIdx * 100 + i * 2 + 1;
+            const randAngle = seededRandom(seedX) * Math.PI * 2;
+            const randDist = seededRandom(seedY) * 0.7;
+            const px = x + Math.cos(randAngle) * rx * randDist;
+            const py = y + Math.sin(randAngle) * ry * randDist;
             ctx.beginPath();
             ctx.arc(px, py, 2.5, 0, Math.PI * 2);
             ctx.fill();
@@ -232,8 +263,10 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
           // Sparkling dots
           ctx.fillStyle = "#FFF";
           for (let i = 0; i < 5; i++) {
-            const sparkleX = x + (Math.random() - 0.5) * rx * 1.2;
-            const sparkleY = y + (Math.random() - 0.5) * ry * 1.2;
+            const seedX = layerIdx * 200 + i * 2;
+            const seedY = layerIdx * 200 + i * 2 + 1;
+            const sparkleX = x + (seededRandom(seedX) - 0.5) * rx * 1.2;
+            const sparkleY = y + (seededRandom(seedY) - 0.5) * ry * 1.2;
             const sparkleSize = Math.abs(Math.sin(time * 5 + i)) * 3;
             drawStar(ctx, sparkleX, sparkleY, 4, sparkleSize, sparkleSize / 2, "#E0FFFF");
           }
@@ -1106,6 +1139,9 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
 
         ctx.restore();
       }
+
+      // Pop the dpr scale save state securely
+      ctx.restore();
 
       animationFrameRef.current = requestAnimationFrame(render);
     };
