@@ -19,10 +19,13 @@ export interface PoopArt {
   curatorComment: string;
   holdingDays: number;
   heldMealsHistory?: MealInput[];
+  season?: "spring" | "summer" | "autumn" | "winter";
+  timeOfDay?: "morning" | "afternoon" | "night";
 }
 
 export interface GuestComment {
   id: string;
+  artId?: string; // Coupled masterpiece ID reference
   author: string;
   emoji: string; // "🧻" | "🏆" | "✨" | "💩" | "💨"
   text: string;

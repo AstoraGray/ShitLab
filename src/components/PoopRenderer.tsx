@@ -21,15 +21,15 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
   visibleSegmentsCount,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [wobble, setWobble] = useState(0); // Wobble amplitude
-  const [wobbleSpeed, setWobbleSpeed] = useState(0); // Wobble current velocity
+  const wobbleRef = useRef(0); // Wobble amplitude
+  const wobbleSpeedRef = useRef(0); // Wobble current velocity
   const [isHovered, setIsHovered] = useState(false);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(Date.now());
 
   // Trigger a "Duang Duang" physical wobble bounce
   const triggerWobble = () => {
-    setWobbleSpeed(0.25);
+    wobbleSpeedRef.current = 0.25;
     if (interactive) {
       playSqueezeSound(150 + Math.random() * 80);
     }
@@ -37,7 +37,7 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
 
   // Trigger wobble automatically on art update
   useEffect(() => {
-    setWobbleSpeed(0.2);
+    wobbleSpeedRef.current = 0.2;
   }, [art.id, art.colorHex, art.shapeType]);
 
   // Handle animation frame physical spring calculations & particles
@@ -47,19 +47,16 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let localWobble = wobble;
-    let localWobbleSpeed = wobbleSpeed;
-
     const render = () => {
       const time = (Date.now() - startTimeRef.current) / 1000;
 
       // Spring physics math: Accel = -k * Position - c * Velocity
       const k = 0.12; // Spring stiffness
       const c = 0.08; // Friction damping
-      const force = -k * localWobble;
-      localWobbleSpeed += force;
-      localWobbleSpeed *= (1 - c);
-      localWobble += localWobbleSpeed;
+      const force = -k * wobbleRef.current;
+      wobbleSpeedRef.current += force;
+      wobbleSpeedRef.current *= (1 - c);
+      wobbleRef.current += wobbleSpeedRef.current;
 
       // Canvas dimensions
       const width = canvas.width;
@@ -91,7 +88,7 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
       // Horizontal offset wobble scale based on vertical height
       const getWobbleOffset = (yOffset: number) => {
         // High layers wobble more (like a bouncy flagpole)
-        return Math.sin(time * 6 + yOffset * 0.05) * localWobble * 25;
+        return Math.sin(time * 6 + yOffset * 0.05) * wobbleRef.current * 25;
       };
 
       // Base drawing functions with spring coordinates
@@ -405,6 +402,132 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
           }
           ctx.restore();
         }
+
+        // --- 5B. SEASONAL & TEMPORAL HYBRID OVERLAY ---
+        const artSeason = art.season || "spring";
+        const artTime = art.timeOfDay || "afternoon";
+
+        ctx.save();
+        
+        // Let's draw spectacular custom seasonal details in perspective corresponding to season and time!
+        if (artSeason === "spring") {
+          // SPRING: Tender green and light pink petal swirls!
+          const leafCount = artTime === "morning" ? 3 : (artTime === "afternoon" ? 5 : 4);
+          
+          for (let i = 0; i < leafCount; i++) {
+            const angle = (time * 1.5 + i * 1.8 + layerIdx) % (Math.PI * 2);
+            const dist = 0.3 + (i * 0.15);
+            const px = x + Math.cos(angle) * rx * dist;
+            const py = y + Math.sin(angle) * ry * dist;
+            
+            ctx.fillStyle = i % 2 === 0 ? "rgba(144, 238, 144, 0.75)" : "rgba(255, 182, 193, 0.8)";
+            ctx.beginPath();
+            ctx.ellipse(px, py, 4, 2, angle + Math.PI/4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw tiny dew glimmers for morning
+            if (artTime === "morning") {
+              ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+              ctx.beginPath();
+              ctx.arc(px - 1, py - 1, 1, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+        } else if (artSeason === "summer") {
+          // SUMMER: Hot golden glare, sunrays, fireflies!
+          if (artTime === "afternoon") {
+            ctx.strokeStyle = "rgba(255, 223, 0, 0.3)";
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < 3; i++) {
+              const rayPos = (time * 10 + i * 25) % (rx * 2);
+              ctx.beginPath();
+              ctx.moveTo(x - rx + rayPos, y - ry);
+              ctx.lineTo(x - rx + rayPos + 10, y + ry);
+              ctx.stroke();
+            }
+          } else if (artTime === "night") {
+            ctx.fillStyle = "rgba(220, 255, 47, 0.9)";
+            for (let i = 0; i < 3; i++) {
+              const flyX = x + Math.sin(time * 2 + i * 3) * rx * 0.7;
+              const flyY = y + Math.cos(time * 1.5 + i * 2) * ry * 0.6;
+              ctx.beginPath();
+              ctx.arc(flyX, flyY, 2.5 + Math.abs(Math.sin(time * 4 + i)) * 1.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          } else {
+            ctx.fillStyle = "rgba(64, 224, 208, 0.55)";
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < 4; i++) {
+              const bx = x + Math.cos(time + i * 1.5) * rx * 0.5;
+              const by = y + Math.sin(time * 1.2 + i) * ry * 0.5;
+              ctx.beginPath();
+              ctx.arc(bx, by, 3, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+            }
+          }
+        } else if (artSeason === "autumn") {
+          // AUTUMN: Beautiful orange falling maple sheets and warm amber/golden dust
+          const leaves = artTime === "afternoon" ? 5 : 3;
+          ctx.fillStyle = "rgba(217, 119, 6, 0.85)";
+          for (let i = 0; i < leaves; i++) {
+            const angle = (time * 1.1 + i * 2.1) % (Math.PI * 2);
+            const dist = 0.2 + (i * 0.16);
+            const px = x + Math.cos(angle) * rx * dist;
+            const py = y + Math.sin(angle) * ry * dist;
+            
+            ctx.beginPath();
+            ctx.moveTo(px, py - 4);
+            ctx.lineTo(px + 3, py - 1);
+            ctx.lineTo(px + 4, py + 2);
+            ctx.lineTo(px, py + 1);
+            ctx.lineTo(px - 4, py + 2);
+            ctx.lineTo(px - 3, py - 1);
+            ctx.closePath();
+            ctx.fill();
+          }
+          
+          if (artTime === "night") {
+            ctx.fillStyle = "rgba(255, 244, 210, 0.35)";
+            ctx.beginPath();
+            ctx.arc(x - rx * 0.2, y - ry * 0.2, rx * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (artSeason === "winter") {
+          // WINTER: Frost crystals and falling hexagonal snow dust!
+          ctx.strokeStyle = "rgba(224, 242, 254, 0.75)";
+          ctx.lineWidth = 1;
+          const snowCount = artTime === "night" ? 5 : 3;
+          for (let i = 0; i < snowCount; i++) {
+            const sx = x + Math.sin(time + i * 2) * rx * 0.6;
+            const sy = y + (Math.cos(time * 0.5 + i) * ry * 0.5) + (Math.sin(time) * 4);
+            
+            ctx.beginPath();
+            ctx.moveTo(sx - 3, sy);
+            ctx.lineTo(sx + 3, sy);
+            ctx.moveTo(sx, sy - 3);
+            ctx.lineTo(sx, sy + 3);
+            ctx.stroke();
+            
+            ctx.fillStyle = "#FFFFFF";
+            ctx.beginPath();
+            ctx.arc(sx, sy, 1, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          
+          if (artTime === "afternoon") {
+            const softWarmIvory = ctx.createRadialGradient(x, y, 5, x, y, rx);
+            softWarmIvory.addColorStop(0, "rgba(255, 253, 230, 0.25)");
+            softWarmIvory.addColorStop(1, "rgba(255, 253, 230, 0)");
+            ctx.fillStyle = softWarmIvory;
+            ctx.beginPath();
+            ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        
+        ctx.restore();
 
         ctx.restore();
       };
@@ -995,7 +1118,7 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [art, wobble, wobbleSpeed, visibleSegmentsCount]);
+  }, [art, visibleSegmentsCount]);
 
   // Helper: Convert hex to RGBA
   const hexToRgba = (hex: string, alpha: number) => {

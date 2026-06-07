@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PoopArt } from "../types";
 import { PoopRenderer } from "./PoopRenderer";
 import { Award, Calendar, Heart, Trash2, ChevronLeft, ChevronRight, Share2, Info } from "lucide-react";
@@ -8,28 +8,91 @@ interface MuseumGalleryProps {
   exhibits: PoopArt[];
   onDeleteExhibit: (id: string) => void;
   onSelectShare: (art: PoopArt) => void;
+  activeIndex?: number;
+  onActiveIndexChange?: (idx: number) => void;
 }
 
 export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
   exhibits,
   onDeleteExhibit,
   onSelectShare,
+  activeIndex: activeIndexProp,
+  onActiveIndexChange,
 }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const isControlled = activeIndexProp !== undefined && onActiveIndexChange !== undefined;
+  const [internalActiveIndex, setInternalActiveIndex] = useState(0);
+
+  const activeIndex = isControlled ? activeIndexProp : internalActiveIndex;
+
+  const setActiveIndex = (val: number | ((prev: number) => number)) => {
+    if (isControlled) {
+      if (onActiveIndexChange) {
+        const nextVal = typeof val === "function" ? val(activeIndex) : val;
+        onActiveIndexChange(nextVal);
+      }
+    } else {
+      setInternalActiveIndex(val);
+    }
+  };
+
+  // Screen size detector for responsive lighting placement
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Mobile swipe touch gestures variables
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+    setTouchEndX(null);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX === null || touchEndX === null) return;
+    const distanceX = touchStartX - touchEndX;
+    const minSwipeDistance = 45; // friendly threshold
+
+    if (distanceX > minSwipeDistance) {
+      handleNext();
+    } else if (distanceX < -minSwipeDistance) {
+      handlePrev();
+    }
+    setTouchStartX(null);
+    setTouchEndX(null);
+  };
+
+  // Reset target index to 0 whenever the length of exhibits changes (e.g. key date filter selected)
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [exhibits.length]);
 
   if (exhibits.length === 0) {
     return (
       <div id="gallery_empty_state" className="flex flex-col items-center justify-center p-12 text-center bg-zinc-900/60 border border-zinc-850 rounded-3xl backdrop-blur-xl">
         <Award className="w-16 h-16 text-zinc-700 mb-4 animate-pulse" />
-        <h3 className="text-xl font-medium text-zinc-300 font-sans mb-2">大屎馆尚无馆藏</h3>
+        <h3 className="text-xl font-medium text-zinc-300 font-sans mb-2">大屎馆当下筛选无馆藏</h3>
         <p className="text-xs text-zinc-500 max-w-sm font-sans">
-          胃囊空荡，画廊寂静。请在上方输入每日膳食，并拉动拉杆释放或蓄力，开启您的第一件赛博艺术品创作。
+          该日历节点下暂无馆藏珍品，请点击下方日历重选，或通过上方开始打卡创作。
         </p>
       </div>
     );
   }
 
-  const activeArt = exhibits[activeIndex];
+  // Double guard index safety
+  const safeActiveIndex = Math.min(activeIndex, Math.max(0, exhibits.length - 1));
+  const activeArt = exhibits[safeActiveIndex];
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % exhibits.length);
@@ -47,35 +110,40 @@ export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
       case "UR":
         return {
           title: "UR - 传世神作 (Grand Masterpiece)",
-          textStyle: "text-amber-600 font-black drop-shadow-sm",
-          lightCone: "from-amber-400/20 via-amber-400/5 to-transparent",
-          containerBg: "radial-gradient(circle, rgba(230,175,46,0.12) 0%, rgba(15,15,15,1) 85%)",
+          textStyle: "text-amber-700 font-black drop-shadow-sm",
+          lightCone: "from-amber-400/35 via-amber-400/12 to-transparent",
+          glowColor: "rgba(230, 175, 46, 0.16)",
         };
       case "SR":
         return {
           title: "SR - 史诗杰作 (Epic Creation)",
-          textStyle: "text-purple-600 font-black",
-          lightCone: "from-purple-400/20 via-purple-300/3 to-transparent",
-          containerBg: "radial-gradient(circle, rgba(147,51,234,0.09) 0%, rgba(15,15,15,1) 85%)",
+          textStyle: "text-purple-700 font-black",
+          lightCone: "from-purple-400/28 via-purple-300/10 to-transparent",
+          glowColor: "rgba(147, 51, 234, 0.12)",
         };
       case "R":
         return {
           title: "R - 先锋艺术 (Avant-Garde)",
-          textStyle: "text-emerald-700 font-extrabold",
-          lightCone: "from-emerald-400/15 via-emerald-300/2 to-transparent",
-          containerBg: "radial-gradient(circle, rgba(16,185,129,0.07) 0%, rgba(15,15,15,1) 85%)",
+          textStyle: "text-emerald-800 font-extrabold",
+          lightCone: "from-emerald-400/24 via-emerald-300/8 to-transparent",
+          glowColor: "rgba(16, 185, 129, 0.10)",
         };
       default:
         return {
           title: "N - 常规展品 (Standard Exhibit)",
-          textStyle: "text-zinc-650 font-bold",
-          lightCone: "from-zinc-100/10 via-zinc-100/1 to-transparent",
-          containerBg: "radial-gradient(circle, rgba(63,63,70,0.04) 0%, rgba(15,15,15,1) 85%)",
+          textStyle: "text-zinc-700 font-bold",
+          lightCone: "from-zinc-300/18 via-zinc-400/5 to-transparent",
+          glowColor: "rgba(120, 120, 120, 0.06)",
         };
     }
   };
 
   const rarityConfig = getRarityConfig(activeArt.rarity);
+
+  // Generate dynamic 3D-oriented radial gradient background targeted layout centers
+  const dynamicStageStyle = {
+    background: `radial-gradient(circle at ${isMobile ? '50% 30%' : '25% 42%'}, ${rarityConfig.glowColor} 0%, rgba(15,15,15,1) 80%)`
+  };
 
   return (
     <div id="museum_gallery_view" className="relative flex flex-col w-full bg-[#0F0F0F] rounded-3xl border border-zinc-800/80 overflow-hidden shadow-2xl">
@@ -85,7 +153,7 @@ export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
         <div className="flex items-center space-x-2.5">
           <Award className="w-5 h-5 text-art-yellow" />
           <span className="text-sm font-mono tracking-widest text-zinc-455 uppercase font-bold">
-            卢浮殿堂级展厅 ({activeIndex + 1} / {exhibits.length})
+            卢浮殿堂级展厅 ({safeActiveIndex + 1} / {exhibits.length})
           </span>
         </div>
         <div className="flex items-center space-x-2">
@@ -99,7 +167,7 @@ export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
           <button
             onClick={() => {
               onDeleteExhibit(activeArt.id);
-              if (activeIndex > 0) setActiveIndex(activeIndex - 1);
+              if (safeActiveIndex > 0) setActiveIndex(safeActiveIndex - 1);
             }}
             className="p-1.5 rounded-xl bg-red-950/40 hover:bg-red-950/75 text-red-400 hover:text-red-300 transition-all cursor-pointer border border-red-900/45"
             title="销毁艺术品"
@@ -109,10 +177,13 @@ export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
         </div>
       </div>
 
-      {/* Main Exhibition Stage with dramatic Spotlight lighting */}
+      {/* Main Exhibition Stage with dramatic Spotlight lighting & Mobile Swipable Gesture Events */}
       <div
-        className="relative flex flex-col md:flex-row items-center justify-center p-6 md:p-12 min-h-[500px] transition-all duration-700 overflow-hidden"
-        style={{ background: rarityConfig.containerBg }}
+        className="relative flex flex-col md:flex-row items-center justify-center p-6 md:p-12 min-h-[500px] transition-all duration-700 overflow-hidden select-none cursor-grab active:cursor-grabbing"
+        style={dynamicStageStyle}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Carousel Arrow Left */}
         <button
@@ -130,19 +201,27 @@ export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        {/* Dynamic Gallery Lighting Spotlight Effect */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-full bg-gradient-to-b from-[#FFFFFF10] to-transparent pointer-events-none z-10" style={{ clipPath: "polygon(38% 0, 62% 0, 100% 100%, 0 100%)" }} />
+        {/* Dynamic Gallery Lighting Spotlight Effect - Perfectly hitting the poop sculpture coordinates */}
+        <div 
+          className={`absolute top-0 ${isMobile ? 'left-1/2' : 'left-[25%]'} -translate-x-1/2 w-[340px] sm:w-[420px] md:w-[500px] h-full bg-gradient-to-b ${rarityConfig.lightCone} pointer-events-none z-10 transition-all duration-500`} 
+          style={{ clipPath: "polygon(38% 0, 62% 0, 100% 100%, 0 100%)" }} 
+        />
 
         {/* The Art Sculpture Rendering & Pedestal Stack */}
         <div className="relative flex flex-col items-center justify-center w-full md:w-1/2 z-20 mt-4">
           
           {/* Masterpiece visual model container */}
           <div className="relative w-64 h-64 mb-1 drop-shadow-[0_20px_50px_rgba(255,100,0,0.25)] flex items-center justify-center">
-            <PoopRenderer art={activeArt} className="transform scale-[1.05] transition-transform active:scale-95 duration-200" />
+            {/* Intensive glowing flare pool reflection under the poop sculpture */}
+            <div className="absolute inset-0 m-auto w-36 h-36 rounded-full bg-white/10 blur-3xl pointer-events-none z-0" />
+            <PoopRenderer art={activeArt} className="transform scale-[1.05] transition-transform active:scale-95 duration-200 z-10" />
           </div>
           
           {/* Authentic Radial-dotted dark Pedestal */}
           <div className="w-80 h-16 bg-[#1A1A1A] border border-white/10 rounded-t-sm shadow-2xl relative overflow-hidden flex flex-col items-center justify-center">
+            {/* Spotlight reflection beam spot on top of the pedestal */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-40 h-6 rounded-full bg-white/15 blur-md pointer-events-none" />
+            
             {/* Dots background gradient */}
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1.5px, transparent 0)", backgroundSize: "16px 16px" }} />
             <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -156,6 +235,11 @@ export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
             </span>
 
             <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5" />
+          </div>
+
+          {/* Elegant Mobile Touch Gesture Hint badge */}
+          <div className="mt-3 md:hidden px-3 py-1 rounded-full bg-zinc-950/60 border border-zinc-800 text-[9px] font-black text-zinc-400 tracking-wider flex items-center space-x-1.5 opacity-80 animate-pulse select-none">
+            <span>← 左右滑动切换藏品 Swipe to Switch →</span>
           </div>
 
         </div>
@@ -176,7 +260,7 @@ export const MuseumGallery: React.FC<MuseumGalleryProps> = ({
               <span className={`text-[10px] uppercase font-mono tracking-wider font-extrabold px-2.5 py-0.5 rounded border border-zinc-400 bg-white/60 ${rarityConfig.textStyle}`}>
                 {activeArt.rarity} · LEVEL
               </span>
-              <span className="text-[10.5px] font-mono text-zinc-500 font-bold">EXHIBIT NO. {activeIndex + 1}/{exhibits.length}</span>
+              <span className="text-[10.5px] font-mono text-zinc-500 font-bold">EXHIBIT NO. {safeActiveIndex + 1}/{exhibits.length}</span>
             </div>
 
             <h2 className="font-serif italic text-2xl text-[#141414] leading-tight mb-2 tracking-tight">

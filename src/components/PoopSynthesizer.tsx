@@ -93,6 +93,8 @@ export const PoopSynthesizer: React.FC<PoopSynthesizerProps> = ({
         curatorComment: data.curatorComment || "创作者诉说着肠胃物理机制的纯净赞歌。",
         holdingDays,
         heldMealsHistory,
+        season: data.season,
+        timeOfDay: data.timeOfDay,
       };
 
       setSynthesizedArt(newPiece);
@@ -109,11 +111,28 @@ export const PoopSynthesizer: React.FC<PoopSynthesizerProps> = ({
       // Local fallback artwork logic
       setTimeout(() => {
         const fallbacks = [
-          { title: "《晨曦中的太妃糖华章》", rarity: "R" as const, comment: "金黄油亮，象征着打卡者的蓬勃生命意志与早膳的饱满谷物重合。" },
-          { title: "《重度焦虑的焦糖脆壳》", rarity: "SR" as const, comment: "蓄力充分。由于辣椒和咖啡因的联合施压，结构张力空前，堪比黑大理石雕塑。" },
-          { title: "《黄金海岸的流体赞歌》", rarity: "UR" as const, comment: "传世之物！肠胃在长期重载后爆发出火山喷发般的创作伟力，色泽耀眼。" }
+          { title: "《清晨第一缕阳光下的太妃糖拉丝》", rarity: "N" as const, comment: "色泽温润，边缘柔和，昭示着艺术家平稳踏实的肠胃微生态循环。" },
+          { title: "《午后双焦咖啡因之神圣结核》", rarity: "R" as const, comment: "富含焦糊气孔与深邃的碳质斑点，代表着咖啡因与高压代谢下的先锋创意碰撞。" },
+          { title: "《重度辛辣红油的存在主义哀歌》", rarity: "R" as const, comment: "高饱和红亮油光，散发着警示性的色彩张力，它是一场昨日火锅狂欢后的肠道重力救赎。" },
+          { title: "《抹茶微风下的森林盆景幻想》", rarity: "R" as const, comment: "草本膳食纤维元素沉积，色泽沉静内敛。犹如初春巴黎雨后的湿润地表苔藓。" },
+          { title: "《两日积压的青铜沙基纪念碑》", rarity: "SR" as const, comment: "结构粗砺沉稳，具有岩石化石般的历史折叠感。两日发酵带来饱满沉甸的轮廓力学。" },
+          { title: "《重度压力下的黑曜石深渊断层》", rarity: "SR" as const, comment: "蓄力深沉。由于摄入与周身荷尔蒙联合施压，硬度极高，闪烁着克制自省的高冷幽光。" },
+          { title: "《麦穗与黄油的黄昏法国浪漫高歌》", rarity: "SR" as const, comment: "法式面包牛角与精细碳水的浪漫交织，色变黄金，是肠道对近代烘焙文明温存的致敬。" },
+          { title: "《万物皆虚的七日鎏金神圣王冠》", rarity: "UR" as const, comment: "传世级殿堂神作！长达七日物理幽闭发酵，铸成奢华的纯金色泽与高达120cm王冠峰峦。" },
+          { title: "《终极宇宙能之幽浮晶体雕琢》", rarity: "UR" as const, comment: "质地剔透并覆盖偏光，流体力学上近于倒扣飞碟。超脱了生理解剖常规的后现代主义圣物。" }
         ];
-        const chosen = holdingDays >= 7 ? fallbacks[2] : (holdingDays >= 3 ? fallbacks[1] : fallbacks[0]);
+        
+        // Randomly select among matching groups
+        let chosen = fallbacks[0];
+        if (holdingDays >= 7) {
+          chosen = Math.random() > 0.5 ? fallbacks[7] : fallbacks[8];
+        } else if (holdingDays >= 3) {
+          const srs = [fallbacks[4], fallbacks[5], fallbacks[6]];
+          chosen = srs[Math.floor(Math.random() * srs.length)];
+        } else {
+          const normals = [fallbacks[0], fallbacks[1], fallbacks[2], fallbacks[3]];
+          chosen = normals[Math.floor(Math.random() * normals.length)];
+        }
         
         const combinedIngredients: string[] = [];
         const allHistoryMeals = [...(heldMealsHistory || []), meals];
@@ -134,8 +153,14 @@ export const PoopSynthesizer: React.FC<PoopSynthesizerProps> = ({
             .filter(Boolean)
             .slice(0, 3)
             .join("、");
-          customFallbackComment = `这是一场长达 ${holdingDays} 天的发酵长河。艺术家自 ${heldMealsHistory.length} 日前便蓄意深潜，底盘暗沉沉积着【${pastSummary || "空腹"}】的古老陈酿痕迹，并与今日释出的【${Object.values(meals).filter(Boolean).join("、") || "空腹"}】完美融汇，彰显出多重时空断层的宿命博弈。`;
+          customFallbackComment = `这是一场长达 ${holdingDays} 天的发酵长河。艺术家自 ${heldMealsHistory.length} 日前便蓄意深潜，底盘暗沉沉积着【${pastSummary || "空腹"}】的古老陈酿痕迹，并与今日释出的【${Object.values(meals).filter(Boolean).join("、") || "空腹"}】完美融汇，整体呈：${chosen.comment}`;
         }
+
+        const nowLoc = new Date();
+        const monthLoc = nowLoc.getMonth();
+        const hourLoc = nowLoc.getHours();
+        const localSeason: "spring" | "summer" | "autumn" | "winter" = (monthLoc >= 2 && monthLoc <= 4) ? "spring" : ((monthLoc >= 5 && monthLoc <= 7) ? "summer" : ((monthLoc >= 8 && monthLoc <= 10) ? "autumn" : "winter"));
+        const localTimeOfDay: "morning" | "afternoon" | "night" = (hourLoc >= 6 && hourLoc < 12) ? "morning" : ((hourLoc >= 12 && hourLoc < 18) ? "afternoon" : "night");
 
         const fallbackPiece: PoopArt = {
           id: "fallback-" + Math.random().toString(36).substr(2, 9),
@@ -149,9 +174,11 @@ export const PoopSynthesizer: React.FC<PoopSynthesizerProps> = ({
           textureType: chosen.rarity === "UR" ? "golden_foil" : "cracked",
           shapeType: "standard_swirl",
           ingredientsAnalyzed: combinedIngredients,
-          curatorComment: customFallbackComment,
+          curatorComment: customFallbackComment + ` ——主厨艺术家：${artistName || "momo"}`,
           holdingDays,
           heldMealsHistory,
+          season: localSeason,
+          timeOfDay: localTimeOfDay,
         };
         setSynthesizedArt(fallbackPiece);
         setStep("lever_ready");

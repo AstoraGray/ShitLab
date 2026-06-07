@@ -4,6 +4,7 @@ import { MealConsole } from "./components/MealConsole";
 import { MuseumGallery } from "./components/MuseumGallery";
 import { PoopSynthesizer } from "./components/PoopSynthesizer";
 import { SocialPoster } from "./components/SocialPoster";
+import { PoopCalendar } from "./components/PoopCalendar";
 import { playTickSound, playDingSound } from "./utils/audio";
 import { Award, PenTool, HelpCircle, Sparkles, UserCheck, Info } from "lucide-react";
 
@@ -11,7 +12,7 @@ export default function App() {
   
   // 1. Initial State Persistence Loaders
   const [artistName, setArtistName] = useState<string>(() => {
-    return localStorage.getItem("poop_museum_artist") || "visitor@cyberpoop.cafe";
+    return localStorage.getItem("poop_museum_artist") || "momo";
   });
   
   const [meals, setMeals] = useState<MealInput>({
@@ -37,39 +38,8 @@ export default function App() {
       }
     }
     
-    // Default pre-loaded relics for initial museum beauty
-    return [
-      {
-        id: "art-initial-01",
-        title: "《午夜麻辣红油的存在主义阵痛》",
-        artist: "visitor@cyberpoop.cafe",
-        meals: { breakfast: "冰美式咖啡", lunch: "尖椒螺蛳粉", dinner: "九宫格重辣火锅" },
-        timestamp: "2026-06-06T15:15:00.000Z",
-        rarity: "R",
-        colorHex: "#B22222",
-        accentColorHex: "#FF4500",
-        textureType: "steaming",
-        shapeType: "standard_swirl",
-        ingredientsAnalyzed: ["冰美式", "尖椒中辣", "重油火锅"],
-        curatorComment: "这件饱满、散发着热烈红色光芒的经典软雪糕流体，控诉了极辣膳食对现代肠壁粘膜无情的重力压迫，更以强饱和的存在主义线条对消费主义深夜暴食进行了尖锐的艺术解构。",
-        holdingDays: 1
-      },
-      {
-        id: "art-initial-02",
-        title: "《松露金箔在重压之下的宏大叙事》",
-        artist: "visitor@cyberpoop.cafe",
-        meals: { breakfast: "特级吉列和牛", lunch: "黑松露菌菇刺身", dinner: "金箔鱼子酱拌饭" },
-        timestamp: "2026-06-02T10:04:00.000Z",
-        rarity: "UR",
-        colorHex: "#F59E0B",
-        accentColorHex: "#D97706",
-        textureType: "metallic_gold",
-        shapeType: "massive_mountain",
-        ingredientsAnalyzed: ["特级和牛", "黑松露", "金箔鱼子酱"],
-        curatorComment: "蓄力长达七日而成的殿堂神作。这件高达150cm的超重载纯金质软雪糕峰峦层层卷绕，闪烁着奢靡质感。它测试着自然引力与腹壁阻尼的极限，是一部对消费主义精致生活沉重代偿的华丽挽歌。",
-        holdingDays: 7
-      }
-    ];
+    // Returned empty list for grand launch - visitors start with an clean, pristine museum gallery
+    return [];
   });
 
   const [guestComments, setGuestComments] = useState<GuestComment[]>(() => {
@@ -107,6 +77,13 @@ export default function App() {
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const [activeShareArt, setActiveShareArt] = useState<PoopArt | null>(null);
   const [showGameInstructions, setShowGameInstructions] = useState(false);
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const [galleryActiveIndex, setGalleryActiveIndex] = useState(0);
+
+  // Reset active showcase slide whenever date-key filter or total exhibit count changes
+  useEffect(() => {
+    setGalleryActiveIndex(0);
+  }, [selectedDateKey, exhibits.length]);
 
   // 2. Synchronize Local Storage when changed
   useEffect(() => {
@@ -146,8 +123,54 @@ export default function App() {
 
   // Handle addition of a newly synthesized masterpiece poop
   const handleSynthesizeComplete = (newArt: PoopArt) => {
+    setSelectedDateKey(null); // Clear active date filter on new creation so the custom art is immediately displayed
     setExhibits((prev) => [newArt, ...prev]);
     setIsSynthesizing(false);
+    
+    // Automatically generate a customized VIP comment in the guest book ledger based on this new piece!
+    const guestAuthors = [
+      "香榭丽舍秘密资深主评 Pierre",
+      "凡尔赛后现代泥塑家 Bernard",
+      "饱受生理力学考证的王教授",
+      "塞纳河畔当代流体力学研究员",
+      "川渝火锅深夜教父 廖馆长",
+      "太空物理与重力流质总监理",
+      "威尼斯古典双年展评审 Céleste",
+      "巴黎拉斐尔先锋画廊常务总监",
+      "米兰时尚周香氛与重力艺术指导",
+      "中医药膳代谢机理调养专家 李医生",
+      "蓬皮杜国家艺术中心首席学者",
+      "前卫有机废料构造学名誉布道人",
+      "巴黎香奈儿首席色彩搭配师 Jeanne"
+    ];
+    
+    const guestCommentsPool = [
+      `被震惊了！这件《${newArt.title}》中那股高饱和的油脂色彩和纯法式弯卷质地，隔着高压罩都有一股令人肃立的卢浮宫高贵神韵！`,
+      `如此不可思议的${newArt.rarity}级史诗神作！它证明了真正的艺术大师在于能从日常代谢中，抽离出对后现代化消费主义极具穿透力的反思！`,
+      `拉下红色阀门拉杆的瞬间简直是行为艺术的巅峰。特别是底部的沉积断层层，简直是用消化引力谱写的一首微缩编年史！`,
+      `我的天，如此完美的巴洛克双螺旋，简直比凡尔赛宫的古典青铜盘饰还要璀璨！太具有戏剧冲突和反叛张力了！`,
+      `令人窒息的质感弧度！多日积屯的高压在此达致物理力学圣殿级的完美平衡，不折不扣的世界杯巡演名作！`,
+      `调色盘简直绝了，主厨艺术家不仅有非凡的厨艺底色，更有无愧于现代先锋派色彩泰斗的高明色准！向您脱帽致敬！`,
+      `那片带露珠的露水薄荷叶的点缀，让本应是纯粹代谢的物质遗存，骤然具备了巴黎春天的轻盈与野性！卓越！`,
+      `长达 ${newArt.holdingDays} 日的情感憋附与高密度发酵，在此达成了无可指摘的宿命凝结，每一寸褶皱都充满生命意志！`,
+      `这是极其罕见的有机结体美学。在底盘厚重的陈酿色泽中，分明跳跃着昨日高卡能食物最后的生命哀鸣！`
+    ];
+
+    const randomAuthor = guestAuthors[Math.floor(Math.random() * guestAuthors.length)];
+    const randomText = guestCommentsPool[Math.floor(Math.random() * guestCommentsPool.length)];
+    const guestEmojis = ["🏆", "✨", "🧻", "💩", "💨", "🎨", "🌟", "🔥"];
+    const emoji = newArt.rarity === "UR" ? "🏆" : (newArt.rarity === "SR" ? "✨" : guestEmojis[Math.floor(Math.random() * guestEmojis.length)]);
+    
+    const autoCmt: GuestComment = {
+      id: "cmt-" + Math.random().toString(36).substr(2, 9),
+      artId: newArt.id, // COUPLED WITH THIS NEW PIECE
+      author: randomAuthor,
+      emoji: emoji,
+      text: randomText,
+      timestamp: new Date().toISOString()
+    };
+    
+    setGuestComments((prev) => [autoCmt, ...prev]);
     
     // Reset ingestion form and indicator
     setMeals({ breakfast: "", lunch: "", dinner: "" });
@@ -162,9 +185,10 @@ export default function App() {
   };
 
   // Submit Guest comment
-  const handleAddComment = (newComment: Omit<GuestComment, "id" | "timestamp">) => {
+  const handleAddComment = (artId: string, newComment: Omit<GuestComment, "id" | "timestamp">) => {
     const commentItem: GuestComment = {
       id: "cmt-" + Math.random().toString(36).substr(2, 9),
+      artId, // Bind comment securely to specific masterpiece excrement artwork!
       ...newComment,
       timestamp: new Date().toISOString(),
     };
@@ -173,7 +197,21 @@ export default function App() {
 
   // Delete/Decommission items
   const handleDeleteExhibit = (id: string) => {
-    setExhibits((prev) => prev.filter((ex) => ex.id !== id));
+    setExhibits((prev) => {
+      const updated = prev.filter((ex) => ex.id !== id);
+      if (selectedDateKey) {
+        const remainingOnDate = updated.some(ex => {
+          if (!ex.timestamp) return false;
+          const d = new Date(ex.timestamp);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          return key === selectedDateKey;
+        });
+        if (!remainingOnDate) {
+          setSelectedDateKey(null); // Auto clear date filter if matching list became empty
+        }
+      }
+      return updated;
+    });
     playTickSound();
   };
 
@@ -183,6 +221,29 @@ export default function App() {
       setArtistName(artistInput.trim());
       setIsEditingArtist(false);
       playDingSound();
+    }
+  };
+
+  // Compute filtered exhibits list based on chosen calendar date key
+  const filteredExhibits = exhibits.filter((ex) => {
+    if (!selectedDateKey) return true;
+    if (!ex.timestamp) return false;
+    const d = new Date(ex.timestamp);
+    const localY = d.getFullYear();
+    const localM = String(d.getMonth() + 1).padStart(2, "0");
+    const localD = String(d.getDate()).padStart(2, "0");
+    return `${localY}-${localM}-${localD}` === selectedDateKey;
+  });
+
+  const handleSelectExhibitIdFromCalendar = (artId: string) => {
+    const idx = filteredExhibits.findIndex(ex => ex.id === artId);
+    if (idx !== -1) {
+      setGalleryActiveIndex(idx);
+      playDingSound();
+      const el = document.getElementById("grand_museum_showcase_gallery");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }
   };
 
@@ -254,16 +315,16 @@ export default function App() {
                 </div>
               )}
 
-              {/* Instructions conceptual bibel trigger */}
+              {/* Instructions conceptual Bible trigger */}
               <button
                 onClick={() => {
                   setShowGameInstructions(!showGameInstructions);
                   playTickSound();
                 }}
-                className="px-3.5 py-1.5 bg-white border-[2.5px] border-art-charcoal text-art-charcoal rounded-xl shadow-[2.5px_2.5px_0px_#2B2D42] active:translate-y-0.5 active:shadow-none font-black text-xs flex items-center space-x-1.5 transition-all cursor-pointer hover:bg-zinc-100"
+                className="px-3.5 py-1.5 bg-white border-[2.5px] border-art-charcoal text-art-charcoal rounded-xl shadow-[2.5px_2.5px_0px_#2B2D42] active:translate-y-0.5 active:shadow-none font-black text-xs flex items-center space-x-1.5 transition-all cursor-pointer hover:bg-zinc-100 animate-pulse"
               >
-                <HelpCircle className="w-4 h-4 text-art-charcoal" />
-                <span>产品概念案 1.0</span>
+                <HelpCircle className="w-4 h-4 text-art-red" />
+                <span>正式运营官方版 1.0</span>
               </button>
             </div>
 
@@ -272,34 +333,34 @@ export default function App() {
 
         {/* CONCEPTUAL 1.0 BIBEL RECIPE BANNER - CREAM RETRO STYLE */}
         {showGameInstructions && (
-          <div id="conceptual_bible_card" className="p-5 rounded-2xl bg-[#FFFBEB] border-[3.5px] border-art-charcoal text-art-charcoal text-left animate-fade-in font-sans shadow-[5px_5px_0px_#2B2D42] relative select-none">
+          <div id="conceptual_bible_card" className="p-5 rounded-2xl bg-[#FFFBEB] border-[3.5px] border-art-charcoal text-art-charcoal text-left animate-fade-in font-sans shadow-[5px_5px_0px_#2B2D42] relative select-none animate-fade-in">
             {/* Corners accents */}
             <div className="absolute top-2 left-2 w-1.2 h-1.2 rounded-full bg-art-charcoal/20" />
             <div className="absolute top-2 right-2 w-1.2 h-1.2 rounded-full bg-art-charcoal/20" />
             <div className="absolute bottom-2 left-2 w-1.2 h-1.2 rounded-full bg-art-charcoal/20" />
             <div className="absolute bottom-2 right-2 w-1.2 h-1.2 rounded-full bg-art-charcoal/20" />
 
-            <h4 className="text-base font-black text-art-charcoal pb-2 border-b border-art-charcoal/25 flex items-center gap-1.5">
+            <h4 className="text-base font-black text-art-charcoal pb-2 border-b border-art-charcoal/25 flex items-center gap-1.5 text-art-red">
               <Sparkles className="w-4 h-4 text-art-red animate-bounce" />
-              赛博大屎馆 《产品策划案 V1.0》 摘要：
+              赛博大屎馆 《开馆运营主创官方通告 V1.0》 ：
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold text-art-charcoal/80 mt-3.5 leading-relaxed">
               <div className="p-3.5 bg-white border-[2px] border-art-charcoal rounded-xl shadow-[2px_2px_0px_#2B2D42]">
-                <strong className="text-art-red block mb-1">🥗 1. 每日膳食打卡：</strong>
+                <strong className="text-art-red block mb-1">🥗 1. 跨时间膳食打卡 (最新升级)：</strong>
                 <p>
-                  录入打卡今日三餐食材。系统智能读取高饱和化学公式，融合成型，直接影响最后雕塑作品的色泽、尖角形态与硬质纹理（例如麻辣火锅出红油）。
+                  录入打卡多餐或憋附历程。支持输入早中晚膳食。憋气发酵时，先前的食物将沉淀为大屎底部的 “古老沉积物”，并与当日释出的最新食材形成多层时空断层，直接体现在创作媒介分析与主厨札记中！
                 </p>
               </div>
               <div className="p-3.5 bg-white border-[2px] border-art-charcoal rounded-xl shadow-[2px_2px_0px_#2B2D42]">
-                <strong className="text-art-blue block mb-1">⚡ 2. 蓄力指针决策锁：</strong>
+                <strong className="text-art-blue block mb-1">⚡ 2. 蓄力指针压力锁：</strong>
                 <p>
-                  可按压选择“先憋着”。蓄力发酵天数越多（最多蓄10天），大肠胃合成压力上升。释出之物几何面积越宏大、尖端形态越奢靡，评级甚至飙升至UR级传奇金箔工艺！
+                  按压“先憋着”启动生理发酵进程。蓄力发酵天数越多（最高第10天），大肠胃合成物理压力极速飙升，作品体积与重力曲线层层暴涨，可触发古董铜、化石、甚至傲世UR级纯黄金箔等传奇纹理！
                 </p>
               </div>
               <div className="p-3.5 bg-white border-[2px] border-art-charcoal rounded-xl shadow-[2px_2px_0px_#2B2D42]">
-                <strong className="text-art-green block mb-1">🎟️ 3. 法式高雅上盘：</strong>
+                <strong className="text-art-green block mb-1">🎟️ 3. 卢浮宫流水线法式上盘：</strong>
                 <p>
-                  拉动红色拉阀，将启动巴黎卢浮宫银器高级流水线。软雪糕膏体旋转缠绕下倾落，机械镊子微调点缀代表初春生机的薄荷叶。罩Ding声升起。
+                  拉动红色上膛拉阀，红油、抹茶及百种风味组合将在流体力学解构下旋转喷射，由巴黎高级镊子点缀带有露珠的法国薄荷叶，敲击清脆盖罩铃，庄严呈现高级艺术收藏品。
                 </p>
               </div>
             </div>
@@ -329,21 +390,41 @@ export default function App() {
         </section>
 
         {/* GALLERY MUSEUM ROTATING CAROUSEL LIST */}
-        <section id="grand_museum_showcase_gallery" className="pt-2">
-          <div className="flex items-center justify-between mb-3 text-left">
-            <span className="text-xs font-mono tracking-widest text-[#FFF] opacity-50 uppercase font-black">
-              MASTERPIECE CAROUSEL EXHIBITS (古典展位)
-            </span>
-            <div className="flex items-center space-x-1.5 text-[10.5px] text-zinc-500 font-bold">
-              <Info className="w-3.5 h-3.5 text-zinc-600" />
-              <span>左右箭头或滑动手势可阅览馆藏珍品</span>
+        <section id="grand_museum_showcase_gallery" className="pt-2 flex flex-col space-y-6">
+          <div>
+            <div className="flex items-center justify-between mb-3 text-left">
+              <span className="text-xs font-mono tracking-widest text-[#FFF] opacity-50 uppercase font-black">
+                MASTERPIECE CAROUSEL EXHIBITS (古典展位)
+              </span>
+              <div className="flex items-center space-x-1.5 text-[10.5px] text-zinc-500 font-bold">
+                <Info className="w-3.5 h-3.5 text-zinc-650" />
+                <span>{selectedDateKey ? `已应用日历筛选：${selectedDateKey}的展品` : "左右箭头或滑动手势可阅览馆藏珍品"}</span>
+              </div>
             </div>
+            
+            <MuseumGallery
+              exhibits={filteredExhibits}
+              onDeleteExhibit={handleDeleteExhibit}
+              onSelectShare={setActiveShareArt}
+              activeIndex={galleryActiveIndex}
+              onActiveIndexChange={setGalleryActiveIndex}
+            />
           </div>
-          <MuseumGallery
-            exhibits={exhibits}
-            onDeleteExhibit={handleDeleteExhibit}
-            onSelectShare={setActiveShareArt}
-          />
+
+          {/* CHRONOLOGICAL CALENDAR FILTER INTERACTION BED */}
+          <div className="pt-2 border-t border-zinc-900">
+            <div className="flex items-center justify-between mb-3 text-left">
+              <span className="text-xs font-mono tracking-widest text-[#FFF] opacity-50 uppercase font-black">
+                EXHIBITION TIMELINE CHRONICLES (主厨创作年鉴日历)
+              </span>
+            </div>
+            <PoopCalendar
+              exhibits={exhibits}
+              selectedDateKey={selectedDateKey}
+              onSelectDateKey={setSelectedDateKey}
+              onSelectExhibitId={handleSelectExhibitIdFromCalendar}
+            />
+          </div>
         </section>
 
       </div>
@@ -377,8 +458,8 @@ export default function App() {
             setActiveShareArt(null);
             playTickSound();
           }}
-          guestComments={guestComments}
-          onAddComment={handleAddComment}
+          guestComments={guestComments.filter(c => c.artId === activeShareArt.id)}
+          onAddComment={(comment) => handleAddComment(activeShareArt.id, comment)}
         />
       )}
 
