@@ -434,8 +434,11 @@ export default function App() {
         <p className="text-[10px] font-mono tracking-widest text-[#FFF] opacity-40 font-black uppercase">
           CYBER POOP MUSEUM © 2026 • PARIS ARTISAN EDITION
         </p>
-        <p className="text-[9px] text-zinc-600 mt-1 font-serif italic">
+        <p className="text-[9px] text-zinc-600 mt-1 font-serif italic mb-2">
           “You are what you eat... literally.”
+        </p>
+        <p className="text-[11px] text-zinc-500 font-medium tracking-wide">
+          创作者：QuQu鼠辈、AstoraGray
         </p>
       </footer>
 
