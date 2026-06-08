@@ -380,6 +380,26 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
       }
     });
 
+    // CLONE SANITIZER FOR OFFSCREEN RENDER:
+    // html2canvas gets extremely confused by CSS transform values or scaled parent hierarchies (such as mobile responsive scales).
+    // To solve this, we create a 1:1, perfectly styled off-screen clone directly nested on document.body without any transform matrices!
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.id = "gourmet_printable_mbti_poster_clone";
+    clone.style.position = "fixed";
+    clone.style.left = "-9999px";
+    clone.style.top = "-9999px";
+    clone.style.transform = "none";
+    clone.style.webkitTransform = "none";
+    clone.style.width = "375px";
+    clone.style.height = "667px";
+    clone.style.minWidth = "375px";
+    clone.style.minHeight = "667px";
+    clone.style.boxSizing = "border-box";
+    clone.style.zIndex = "-9999";
+    clone.style.animation = "none";
+    clone.style.transition = "none";
+    document.body.appendChild(clone);
+
     // PHYSICAL GETTER MONKEYPATCHES:
     // Intercept standard rendering style access rules to replace oklch / oklab colors during html2canvas generation
     const originalGetComputedStyle = window.getComputedStyle;
@@ -524,7 +544,8 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
     };
 
     try {
-      const canvas = await html2canvas(element, {
+      // Direct html2canvas to the off-screen unscaled 1:1 clone node inside body
+      const canvas = await html2canvas(clone, {
         useCORS: true,
         scale: 2.5, // Crisp supersampling
         backgroundColor: "#0D0E12",
@@ -561,6 +582,13 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
       // Restore active stylesheets on parent document instantly
       restoreAllSheets();
 
+      // Clean up the offscreen clone
+      if (clone && clone.parentNode) {
+        try {
+          clone.parentNode.removeChild(clone);
+        } catch (e) {}
+      }
+
       // Restore interactive dynamic canvas models inside main viewport post snapshot
       canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent }) => {
         try {
@@ -593,6 +621,13 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
     } catch (error) {
       // Make sure to restore sheets on error too!
       restoreAllSheets();
+
+      // Clean up the offscreen clone
+      if (clone && clone.parentNode) {
+        try {
+          clone.parentNode.removeChild(clone);
+        } catch (e) {}
+      }
 
       console.error("Poster printing action exception catch:", error);
       canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent }) => {
@@ -969,7 +1004,7 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
                       style={{ background: spotlightTheme.flare }}
                     />
                     
-                    <span className="absolute top-2 left-2.5 text-[7px] font-sans font-bold border px-1.5 py-0.5 rounded z-10" style={{ backgroundColor: spotlightTheme.badgeBg, borderColor: spotlightTheme.badgeBorder, color: spotlightTheme.badgeText }}>
+                    <span className="absolute top-2 left-2.5 text-[9px] font-sans font-extrabold border px-2 py-1 rounded z-10 leading-none" style={{ backgroundColor: spotlightTheme.badgeBg, borderColor: spotlightTheme.badgeBorder, color: spotlightTheme.badgeText }}>
                       {spotlightTheme.label}
                     </span>
                     
@@ -978,10 +1013,10 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
                       <PoopRenderer art={cPositionExhibit} interactive={false} className="transform scale-[1.2] transition-all duration-300" />
                     </div>
 
-                    <strong className="text-[11px] text-zinc-100 uppercase font-sans font-extrabold truncate max-w-[300px] pb-0.5 block leading-normal z-10">
-                      {cPositionExhibit.title}
+                    <strong className="text-[12px] text-zinc-100 uppercase font-sans font-black pb-0.5 block leading-normal z-10 text-center tracking-wide px-2">
+                      {cPositionExhibit.title.length > 24 ? cPositionExhibit.title.slice(0, 23) + "..." : cPositionExhibit.title}
                     </strong>
-                    <p className="text-[8px] text-zinc-400 font-mono z-10 leading-none">
+                    <p className="text-[9px] text-zinc-400 font-mono z-10 leading-normal">
                       主厨艺术家：<strong className="text-amber-400 font-sans font-bold">{artistName}</strong> • 理化肌理：<strong className="text-zinc-200">{cPositionExhibit.textureType || "晶冕砂浆"}</strong>
                     </p>
                   </div>
@@ -1028,21 +1063,20 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
                     {/* Right stats: Title cards - safe height spacing with no clipping overflow */}
                     <div className="flex-1 min-w-0 bg-[#111218] border rounded-xl p-2.5 flex flex-col justify-between text-left" style={{ borderColor: "rgba(161, 161, 170, 0.08)" }}>
                       <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[14px] font-mono font-black tracking-tight text-zinc-100 border px-1.5 py-0.5 rounded animate-pulse" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", borderColor: "rgba(255, 255, 255, 0.15)" }}>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[13px] font-mono font-black tracking-tight text-zinc-100 border px-1.5 py-0.5 rounded animate-pulse" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", borderColor: "rgba(255, 255, 255, 0.15)" }}>
                             {activeProfile.key}
                           </span>
-                          <div className="flex flex-col min-w-0 justify-center pl-1">
-                            <h4 className="text-[12px] font-sans font-black text-white block leading-[1.3] py-0.5">
+                          <div className="flex flex-col min-w-0 justify-center">
+                            <h4 className="text-[11px] font-sans font-black text-white block leading-[1.3]">
                               {activeProfile.title}
                             </h4>
-                            <span className="text-[7.5px] font-mono text-zinc-500 block leading-[1.2]">{activeProfile.englishTitle}</span>
                           </div>
                         </div>
                         
-                        {/* Substring-based programmatic truncation to perfectly prevent canvas multi-line clipping */}
-                        <p className="text-[8.5px] font-semibold text-zinc-300 leading-normal font-sans mt-2 pb-1 select-text">
-                          “{activeProfile.description.length > 95 ? activeProfile.description.slice(0, 93) + "..." : activeProfile.description}”
+                        {/* Substring-based programmatic truncation and relaxed leading line-heights to perfectly prevent any canvas multi-line overlaps */}
+                        <p className="text-[9px] font-medium text-zinc-300 leading-relaxed font-sans mt-2 pb-1 select-text">
+                          “{activeProfile.description.length > 82 ? activeProfile.description.slice(0, 80) + "..." : activeProfile.description}”
                         </p>
                       </div>
 
@@ -1065,12 +1099,12 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
                       <div className="flex gap-2 text-[8px] font-black w-full">
                         <div className="flex-1 min-w-0 p-1 px-1.5 rounded border" style={{ backgroundColor: "rgba(16, 185, 129, 0.05)", borderColor: "rgba(16, 185, 129, 0.2)" }}>
                           <span className="text-emerald-400 block text-[6.5px] leading-normal pb-0.5">绝配天作 MATCH 🏆</span>
-                          <span className="text-white block truncate text-[8.5px] max-w-[90px] leading-normal pb-1 font-semibold">{activeProfile.bestMatchTitle.replace(/【|】/g, "")}</span>
+                          <span className="text-white block truncate text-[9px] max-w-[90px] leading-normal pb-1 font-bold">{activeProfile.bestMatchTitle.replace(/【|】/g, "")}</span>
                         </div>
                         
                         <div className="flex-1 min-w-0 p-1 px-1.5 rounded border" style={{ backgroundColor: "rgba(239, 68, 68, 0.05)", borderColor: "rgba(239, 68, 68, 0.2)" }}>
                           <span className="text-red-400 block text-[6.5px] leading-normal pb-0.5">生化隐雷 ALERT ☣️</span>
-                          <span className="text-white block truncate text-[8.5px] max-w-[90px] leading-normal pb-1 font-semibold">{activeProfile.dangerMatchTitle.replace(/【|】/g, "")}</span>
+                          <span className="text-white block truncate text-[9px] max-w-[90px] leading-normal pb-1 font-bold">{activeProfile.dangerMatchTitle.replace(/【|】/g, "")}</span>
                         </div>
                       </div>
                     </div>
