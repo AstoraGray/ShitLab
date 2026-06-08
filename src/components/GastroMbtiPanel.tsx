@@ -690,10 +690,10 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
               setGeneratedPosterSrc(null);
               playDingSound();
             }}
-            className="px-6 py-3 text-xs font-black bg-[#16171E] hover:bg-[#1C1E26] border border-zinc-700 text-zinc-100 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.5)] active:translate-y-px active:shadow-none font-extrabold cursor-pointer transition-all flex items-center gap-2 select-none"
+            className="px-6 py-3.5 text-xs font-black bg-gradient-to-r from-amber-500/10 via-amber-500/25 to-amber-500/10 hover:from-amber-500/20 hover:via-amber-500/35 hover:to-amber-500/20 border-2 border-solid border-amber-500/60 hover:border-amber-400 text-amber-200 hover:text-white rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_30px_rgba(245,158,11,0.35)] active:scale-95 duration-300 cursor-pointer transition-all flex items-center gap-2.5 select-none"
           >
-            <Sparkles className="w-4 h-4 text-zinc-350" />
-            <span className="tracking-wide">阿波罗大厅专属 鉴定大字报导出</span>
+            <Sparkles className="w-4.5 h-4.5 text-amber-400 animate-pulse" />
+            <span className="tracking-wide font-black">👑 阿波罗大厅专属 • 鉴定大字报导出</span>
           </button>
         </div>
       </div>
