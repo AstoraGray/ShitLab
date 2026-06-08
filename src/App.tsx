@@ -5,6 +5,7 @@ import { MuseumGallery } from "./components/MuseumGallery";
 import { PoopSynthesizer } from "./components/PoopSynthesizer";
 import { SocialPoster } from "./components/SocialPoster";
 import { PoopCalendar } from "./components/PoopCalendar";
+import { GastroMbtiPanel } from "./components/GastroMbtiPanel";
 import { playTickSound, playDingSound } from "./utils/audio";
 import { Award, PenTool, HelpCircle, Sparkles, UserCheck, Info } from "lucide-react";
 
@@ -268,7 +269,7 @@ export default function App() {
                 CYBER MUSEUM OF FECAL MODERN ART
               </span>
               <h1 className="text-xl md:text-2xl font-serif font-black text-white italic tracking-tight flex items-center gap-2 mt-0.5">
-                赛博大屎馆 <span className="text-[10px] font-mono tracking-normal font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded italic select-none">正式运营官方版 v1.01</span>
+                赛博大屎馆 <span className="text-[10px] font-mono tracking-normal font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded italic select-none">正式运营官方版 v1.03</span>
               </h1>
             </div>
           </div>
@@ -324,7 +325,7 @@ export default function App() {
                 className="px-3.5 py-1.5 bg-white border-[2.5px] border-art-charcoal text-art-charcoal rounded-xl shadow-[2.5px_2.5px_0px_#2B2D42] active:translate-y-0.5 active:shadow-none font-black text-xs flex items-center space-x-1.5 transition-all cursor-pointer hover:bg-zinc-100 animate-pulse"
               >
                 <HelpCircle className="w-4 h-4 text-art-red" />
-                <span>正式运营官方版 1.02</span>
+                <span>正式运营官方版 1.03</span>
               </button>
             </div>
 
@@ -342,7 +343,7 @@ export default function App() {
 
             <h4 className="text-base font-black text-art-charcoal pb-2 border-b border-art-charcoal/25 flex items-center gap-1.5 text-art-red">
               <Sparkles className="w-4 h-4 text-art-red animate-bounce" />
-              赛博大屎馆 《开馆运营主创官方通告 V1.01》 ：
+              赛博大屎馆 《开馆运营主创官方通告 V1.03》 ：
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-semibold text-art-charcoal/80 mt-3.5 leading-relaxed">
               <div className="p-3.5 bg-white border-[2px] border-art-charcoal rounded-xl shadow-[2px_2px_0px_#2B2D42]">
@@ -388,6 +389,13 @@ export default function App() {
             heldMealsHistory={heldMealsHistory}
           />
         </section>
+
+        {/* NEW G-MBTI INTELLECTUAL BIOSTRUCTURE RESEARCH HUB */}
+        {exhibits.length > 0 && (
+          <section id="cyber_g_mbti_analytics_hub" className="relative z-10">
+            <GastroMbtiPanel exhibits={exhibits} />
+          </section>
+        )}
 
         {/* GALLERY MUSEUM ROTATING CAROUSEL LIST */}
         <section id="grand_museum_showcase_gallery" className="pt-2 flex flex-col space-y-6">

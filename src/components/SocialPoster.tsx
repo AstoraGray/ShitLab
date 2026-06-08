@@ -5,6 +5,173 @@ import { Award, Share2, Clipboard, Heart, Send, Sparkles, Coffee, ExternalLink, 
 import { playDingSound, playTickSound } from "../utils/audio";
 import html2canvas from "html2canvas";
 
+// Global OKLCH parser and converter helpers for html2canvas compatibility
+const parseOklch = (str: string) => {
+  const cleaned = str.replace(/oklch\((.*)\)/i, "$1").trim();
+  const parts = cleaned.split(/[\s,/]+/).filter(Boolean);
+  if (parts.length < 3) return null;
+
+  let l = parseFloat(parts[0]);
+  if (parts[0].endsWith("%")) l /= 100;
+
+  let c = parseFloat(parts[1]);
+  if (parts[1].endsWith("%")) c /= 100;
+
+  let h = parseFloat(parts[2]);
+  if (parts[2].endsWith("rad")) {
+    h = parseFloat(parts[2]) * (180 / Math.PI);
+  } else if (parts[2].endsWith("turn")) {
+    h = parseFloat(parts[2]) * 360;
+  }
+
+  let a = 1;
+  if (parts.length >= 4) {
+    a = parseFloat(parts[3]);
+    if (parts[3].endsWith("%")) a /= 100;
+  }
+
+  return { l, c, h, a };
+};
+
+const oklchToRgb = (l: number, c: number, h: number, a: number = 1): string => {
+  const hRad = (h * Math.PI) / 180;
+  const L = l;
+  const _a = c * Math.cos(hRad);
+  const _b = c * Math.sin(hRad);
+
+  const l_ = L + 0.3963377774 * _a + 0.2158037573 * _b;
+  const m_ = L - 0.1055613458 * _a - 0.0638541728 * _b;
+  const s_ = L - 0.0894841775 * _a - 1.2914855480 * _b;
+
+  const l_cube = l_ * l_ * l_;
+  const m_cube = m_ * m_ * m_;
+  const s_cube = s_ * s_ * s_;
+
+  const r = +4.0767416621 * l_cube - 3.3077115913 * m_cube + 0.2309699292 * s_cube;
+  const g = -1.2684380046 * l_cube + 2.6097574011 * m_cube - 0.3413193965 * s_cube;
+  const b = -0.0041960863 * l_cube - 0.7034186147 * m_cube + 1.7076147010 * s_cube;
+
+  const gamma = (val: number) => {
+    return val <= 0.0031308 ? 12.92 * val : 1.055 * Math.pow(val, 1 / 2.4) - 0.055;
+  };
+
+  const R = Math.max(0, Math.min(255, Math.round(gamma(r) * 255)));
+  const G = Math.max(0, Math.min(255, Math.round(gamma(g) * 255)));
+  const B = Math.max(0, Math.min(255, Math.round(gamma(b) * 255)));
+
+  if (a === 1) {
+    return `rgb(${R}, ${G}, ${B})`;
+  } else {
+    return `rgba(${R}, ${G}, ${B}, ${a})`;
+  }
+};
+
+const fallbackForTailwindOklch = (match: string): string => {
+  const lowercase = match.toLowerCase();
+  
+  // Extract alpha (e.g. "/ 0.4" or "/ 20%")
+  let alpha = 1;
+  const alphaMatch = lowercase.match(/\/[\s]*([0-9.%]+)/);
+  if (alphaMatch) {
+    const rawAlpha = alphaMatch[1];
+    if (rawAlpha.endsWith("%")) {
+      alpha = parseFloat(rawAlpha) / 100;
+    } else {
+      alpha = parseFloat(rawAlpha);
+    }
+    if (isNaN(alpha)) alpha = 1;
+  }
+
+  // Check for intensity/brightness
+  let intensity = 500; // default medium
+  const numMatch = lowercase.match(/([0-9]{3})/);
+  if (numMatch) {
+    intensity = parseInt(numMatch[1], 10);
+  }
+
+  // Find color family
+  let baseRgb = "120, 120, 120"; // default gray
+  if (lowercase.includes("white")) {
+    baseRgb = "255, 255, 255";
+  } else if (lowercase.includes("black")) {
+    baseRgb = "0, 0, 0";
+  } else if (lowercase.includes("zinc")) {
+    if (intensity <= 200) baseRgb = "244, 244, 245";
+    else if (intensity >= 700) baseRgb = "24, 24, 27";
+    else baseRgb = "113, 113, 122";
+  } else if (lowercase.includes("gray")) {
+    if (intensity <= 200) baseRgb = "242, 242, 247";
+    else if (intensity >= 700) baseRgb = "28, 28, 30";
+    else baseRgb = "142, 142, 147";
+  } else if (lowercase.includes("slate")) {
+    if (intensity <= 200) baseRgb = "241, 245, 249";
+    else if (intensity >= 700) baseRgb = "15, 23, 42";
+    else baseRgb = "100, 116, 139";
+  } else if (lowercase.includes("amber")) {
+    baseRgb = intensity <= 200 ? "254, 243, 199" : (intensity >= 700 ? "180, 83, 9" : "245, 158, 11");
+  } else if (lowercase.includes("yellow")) {
+    baseRgb = intensity <= 200 ? "254, 240, 138" : (intensity >= 700 ? "161, 98, 7" : "234, 179, 8");
+  } else if (lowercase.includes("emerald")) {
+    baseRgb = intensity <= 200 ? "209, 250, 229" : (intensity >= 700 ? "4, 120, 87" : "16, 185, 129");
+  } else if (lowercase.includes("green")) {
+    baseRgb = intensity <= 200 ? "220, 252, 231" : (intensity >= 700 ? "21, 128, 61" : "34, 197, 94");
+  } else if (lowercase.includes("red")) {
+    baseRgb = intensity <= 200 ? "254, 226, 226" : (intensity >= 700 ? "185, 28, 28" : "239, 68, 68");
+  } else if (lowercase.includes("rose")) {
+    baseRgb = intensity <= 200 ? "254, 228, 232" : (intensity >= 700 ? "190, 24, 74" : "244, 63, 94");
+  } else if (lowercase.includes("blue")) {
+    baseRgb = intensity <= 200 ? "219, 234, 254" : (intensity >= 700 ? "29, 78, 216" : "59, 130, 246");
+  } else if (lowercase.includes("cyan")) {
+    baseRgb = intensity <= 200 ? "207, 250, 254" : (intensity >= 700 ? "14, 116, 144" : "6, 182, 212");
+  } else if (lowercase.includes("sky")) {
+    baseRgb = intensity <= 200 ? "224, 242, 254" : (intensity >= 700 ? "3, 105, 161" : "14, 165, 233");
+  } else if (lowercase.includes("purple")) {
+    baseRgb = intensity <= 200 ? "243, 232, 255" : (intensity >= 700 ? "126, 34, 206" : "147, 51, 234");
+  } else if (lowercase.includes("violet")) {
+    baseRgb = intensity <= 200 ? "237, 233, 254" : (intensity >= 700 ? "109, 40, 217" : "139, 92, 246");
+  } else {
+    if (lowercase.includes("art-yellow")) baseRgb = "255, 217, 61";
+    else if (lowercase.includes("art-red")) baseRgb = "255, 107, 107";
+    else if (lowercase.includes("art-blue")) baseRgb = "77, 150, 255";
+    else if (lowercase.includes("art-green")) baseRgb = "107, 203, 119";
+    else if (lowercase.includes("art-charcoal")) baseRgb = "43, 45, 66";
+    else if (lowercase.includes("art-cream")) baseRgb = "255, 251, 235";
+    else if (lowercase.includes("art-dark")) baseRgb = "15, 15, 15";
+  }
+
+  return `rgba(${baseRgb}, ${alpha})`;
+};
+
+const convertOklchStringToRgb = (val: string): string => {
+  if (!val || typeof val !== "string") return val;
+  if (!val.includes("oklch") && !val.includes("oklab")) return val;
+
+  let res = val;
+  const oklchRegex = /oklch\([^)]+\)/gi;
+  res = res.replace(oklchRegex, (match) => {
+    try {
+      if (match.includes("from") || match.includes("var") || match.includes("currentcolor")) {
+        return fallbackForTailwindOklch(match);
+      }
+      const parsed = parseOklch(match);
+      if (parsed) {
+        if (isNaN(parsed.l) || isNaN(parsed.c) || isNaN(parsed.h)) {
+          return fallbackForTailwindOklch(match);
+        }
+        return oklchToRgb(parsed.l, parsed.c, parsed.h, parsed.a);
+      }
+    } catch (e) {
+      console.error("Error parsing/converting oklch match in convertOklchStringToRgb:", match, e);
+    }
+    return fallbackForTailwindOklch(match);
+  });
+
+  const oklabRegex = /oklab\([^)]+\)/gi;
+  res = res.replace(oklabRegex, "rgba(120, 120, 120, 1)");
+
+  return res;
+};
+
 interface SocialPosterProps {
   art: PoopArt;
   onClose: () => void;
@@ -38,63 +205,213 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
     return { fontSize: "9.5px", lineHeight: "1.3", lineClamp: 4 };
   };
 
-  const handleGenerateImage = () => {
+  const handleGenerateImage = async () => {
     setIsGenerating(true);
     playTickSound();
     
     // Give browser a frame to finish layout before snapshotting
-    setTimeout(() => {
-      const element = document.getElementById("gourmet_printable_postcard");
-      if (!element) {
-        setIsGenerating(false);
-        return;
-      }
-      
-      // PRE-CAPTURE: Convert the dynamic live <canvas> elements to static high-resolution <img> tags
-      // directly in the active doc just before html2canvas runs. This guarantees that all active textures, 
-      // particle ticks, and custom season overlays currently being rendered are captured with pixel-perfect accuracy.
-      const canvasReplacements: { canvas: HTMLCanvasElement; img: HTMLImageElement; parent: HTMLElement; nextSibling: Node | null }[] = [];
-      const originalCanvases = element.querySelectorAll("canvas");
-      
-      originalCanasLoop: originalCanvases.forEach((origCanvas) => {
-        if (origCanvas instanceof HTMLCanvasElement) {
-          try {
-            const imgUrl = origCanvas.toDataURL("image/png");
-            const staticImg = document.createElement("img");
-            staticImg.src = imgUrl;
-            
-            // Replicate classes and inline style bounds precisely
-            staticImg.className = origCanvas.className;
-            staticImg.style.cssText = origCanvas.style.cssText;
-            staticImg.style.width = "100%";
-            staticImg.style.height = "100%";
-            staticImg.style.maxWidth = "100%";
-            staticImg.style.maxHeight = "100%";
-            
-            // Set layout proportions
-            const widthAttr = origCanvas.getAttribute("width") || "350";
-            const heightAttr = origCanvas.getAttribute("height") || "320";
-            staticImg.setAttribute("width", widthAttr);
-            staticImg.setAttribute("height", heightAttr);
-            
-            const parent = origCanvas.parentNode as HTMLElement;
-            if (parent) {
-              const nextSibling = origCanvas.nextSibling;
-              parent.replaceChild(staticImg, origCanvas);
-              canvasReplacements.push({
-                canvas: origCanvas,
-                img: staticImg,
-                parent,
-                nextSibling
-              });
-            }
-          } catch (canvasErr) {
-            console.error("Failed to temporarily replace live canvas for export:", canvasErr);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const element = document.getElementById("gourmet_printable_postcard");
+    if (!element) {
+      setIsGenerating(false);
+      return;
+    }
+    
+    // PRE-CAPTURE: Convert the dynamic live <canvas> elements to static high-resolution <img> tags
+    // directly in the active doc just before html2canvas runs. This guarantees that all active textures, 
+    // particle ticks, and custom season overlays currently being rendered are captured with pixel-perfect accuracy.
+    const canvasReplacements: { canvas: HTMLCanvasElement; img: HTMLImageElement; parent: HTMLElement; nextSibling: Node | null }[] = [];
+    const originalCanvases = element.querySelectorAll("canvas");
+    
+    originalCanvases.forEach((origCanvas) => {
+      if (origCanvas instanceof HTMLCanvasElement) {
+        try {
+          const imgUrl = origCanvas.toDataURL("image/png");
+          const staticImg = document.createElement("img");
+          staticImg.src = imgUrl;
+          
+          // Replicate classes and inline style bounds precisely
+          staticImg.className = origCanvas.className;
+          staticImg.style.cssText = origCanvas.style.cssText;
+          staticImg.style.width = "100%";
+          staticImg.style.height = "100%";
+          staticImg.style.maxWidth = "100%";
+          staticImg.style.maxHeight = "100%";
+          
+          // Set layout proportions
+          const widthAttr = origCanvas.getAttribute("width") || "350";
+          const heightAttr = origCanvas.getAttribute("height") || "320";
+          staticImg.setAttribute("width", widthAttr);
+          staticImg.setAttribute("height", heightAttr);
+          
+          const parent = origCanvas.parentNode as HTMLElement;
+          if (parent) {
+            const nextSibling = origCanvas.nextSibling;
+            parent.replaceChild(staticImg, origCanvas);
+            canvasReplacements.push({
+              canvas: origCanvas,
+              img: staticImg,
+              parent,
+              nextSibling
+            });
           }
+        } catch (canvasErr) {
+          console.error("Failed to temporarily replace live canvas for export:", canvasErr);
+        }
+      }
+    });
+
+    // Symmetrical inline oklch sanitizer for style tags and inline stylings
+    const sanitizeCSS = (val: string): string => {
+      return convertOklchStringToRgb(val);
+    };
+
+    // PHYSICAL GETTER MONKEYPATCHES:
+    // Intercept standard rendering style access rules to replace oklch / oklab colors during html2canvas generation
+    const originalGetComputedStyle = window.getComputedStyle;
+    const originalGetPropertyValue = CSSStyleDeclaration.prototype.getPropertyValue;
+    const originalCssTextDescriptor = Object.getOwnPropertyDescriptor(CSSRule.prototype, "cssText");
+
+    const bypassColorFunctions = (val: string): string => {
+      return convertOklchStringToRgb(val);
+    };
+
+    // Patch window.getComputedStyle in-flight
+    window.getComputedStyle = function (el, pseudoEl) {
+      const style = originalGetComputedStyle.call(this, el, pseudoEl);
+      return new Proxy(style, {
+        get(target, prop) {
+          const val = Reflect.get(target, prop);
+          if (typeof val === "function") {
+            if (prop === "getPropertyValue") {
+              return function (propertyName: string) {
+                const raw = val.call(target, propertyName);
+                return bypassColorFunctions(raw);
+              };
+            }
+            return val.bind(target);
+          }
+          if (typeof prop === "string" && typeof val === "string") {
+            return bypassColorFunctions(val);
+          }
+          return val;
+        }
+      });
+    };
+
+    // Patch CSSStyleDeclaration prototype
+    CSSStyleDeclaration.prototype.getPropertyValue = function (propertyName: string) {
+      const val = originalGetPropertyValue.call(this, propertyName);
+      return bypassColorFunctions(val);
+    };
+
+    // Patch CSSRule.prototype cssText
+    if (originalCssTextDescriptor && originalCssTextDescriptor.get) {
+      Object.defineProperty(CSSRule.prototype, "cssText", {
+        get() {
+          const val = originalCssTextDescriptor.get!.call(this);
+          return bypassColorFunctions(val);
+        },
+        configurable: true
+      });
+    }
+
+    // PRE-CAPTURE PARENT DOCUMENT STYLESHEET SANITIZATION:
+    // html2canvas reads document.styleSheets in the active window. Local stylesheets generated by Tailwind v4
+    // containing modern colour functions like oklch/oklab trigger uncaught errors inside the library's stylesheet parser.
+    // We temporarily sanitize those style blocks on the active page, launch html2canvas, and restore them immediately after.
+    const originalStyleContentsByTag = new Map<HTMLStyleElement, string>();
+    const tempSanitizedStyleTags: HTMLStyleElement[] = [];
+    const disabledLinkStylesheets: { link: HTMLLinkElement; originalDisabled: boolean }[] = [];
+
+    // Sanitize standard <style> tags
+    const mainStyleTags = Array.from(document.querySelectorAll("style"));
+    mainStyleTags.forEach((styleTag) => {
+      try {
+        const content = styleTag.textContent || "";
+        if (content.includes("oklch") || content.includes("oklab")) {
+          originalStyleContentsByTag.set(styleTag, content);
+          styleTag.textContent = sanitizeCSS(content);
+        }
+      } catch (err) {
+        console.warn("Unable to backup/sanitize parent style tag:", err);
+      }
+    });
+
+    // Fetch and sanitize external link stylesheets dynamically (e.g. bundled Tailwind CSS)
+    const linkSheets = Array.from(document.querySelectorAll("link[rel='stylesheet']"));
+    for (const link of linkSheets) {
+      if (link instanceof HTMLLinkElement) {
+        try {
+          const response = await fetch(link.href);
+          if (response.ok) {
+            const text = await response.text();
+            if (text.includes("oklch") || text.includes("oklab")) {
+              const sanitizedText = sanitizeCSS(text);
+              const style = document.createElement("style");
+              style.textContent = sanitizedText;
+              document.head.appendChild(style);
+              tempSanitizedStyleTags.push(style);
+
+              // Temporarily disable original link stylesheet so html2canvas ignores it
+              disabledLinkStylesheets.push({ link, originalDisabled: link.disabled });
+              link.disabled = true;
+              if (link.sheet) {
+                link.sheet.disabled = true;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to sanitize external link stylesheet dynamically in SocialPoster:", link.href, err);
+        }
+      }
+    }
+
+    const restoreAllSheets = () => {
+      // Restore physical getter monkeypatches instantly
+      window.getComputedStyle = originalGetComputedStyle;
+      CSSStyleDeclaration.prototype.getPropertyValue = originalGetPropertyValue;
+      if (originalCssTextDescriptor) {
+        Object.defineProperty(CSSRule.prototype, "cssText", originalCssTextDescriptor);
+      }
+
+      // Restore standard style tags
+      originalStyleContentsByTag.forEach((origContent, tag) => {
+        try {
+          tag.textContent = origContent;
+        } catch (restoreErr) {
+          console.warn("Failed to restore parent style tag:", restoreErr);
+        }
+      });
+      originalStyleContentsByTag.clear();
+
+      // Clean up temp style tags
+      tempSanitizedStyleTags.forEach((style) => {
+        try {
+          if (style.parentNode) {
+            style.parentNode.removeChild(style);
+          }
+        } catch (err) {
+          console.warn("Failed to remove temp style tag:", err);
         }
       });
 
-      html2canvas(element, {
+      // Re-enable link elements
+      disabledLinkStylesheets.forEach(({ link, originalDisabled }) => {
+        try {
+          link.disabled = originalDisabled;
+          if (link.sheet) {
+            link.sheet.disabled = originalDisabled;
+          }
+        } catch (err) {
+          console.warn("Failed to restore link element:", err);
+        }
+      });
+    };
+
+    try {
+      const canvas = await html2canvas(element, {
         useCORS: true,
         scale: 2, // High resolution Retinal supersampling
         backgroundColor: "#E4E3E0", // Match french ivory card color
@@ -104,62 +421,76 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
         width: element.offsetWidth,
         height: element.offsetHeight,
         onclone: (clonedDoc) => {
-          // Robust workaround for html2canvas color parsing library bug:
-          // Tailwind CSS v4 compiles color properties to modern oklch(...) and oklab(...) structures
-          // which are unsupported by the older core CSS parser in html2canvas.
-          // We intercept the cloned DOM style blocks and rewrite oklch and oklab values to safe rgb representation.
           const styleElements = clonedDoc.querySelectorAll("style");
           styleElements.forEach((styleTag) => {
             try {
-              let text = styleTag.textContent || "";
-              if (text.includes("oklch") || text.includes("oklab")) {
-                text = text.replace(/oklch\([^)]+\)/gi, "rgb(120, 120, 120)");
-                text = text.replace(/oklab\([^)]+\)/gi, "rgb(120, 120, 120)");
-                styleTag.textContent = text;
+              if (styleTag.textContent) {
+                styleTag.textContent = sanitizeCSS(styleTag.textContent);
               }
             } catch (err) {
               console.warn("Unable to sanitize cloned style element:", err);
             }
           });
-        }
-      }).then((canvas) => {
-        // RESTORE: Put the original live animated canvas elements back into the view immediately
-        canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent, nextSibling }) => {
-          try {
-            if (staticImg.parentNode === parent) {
-              parent.replaceChild(origCanvas, staticImg);
-            }
-          } catch (restoreErr) {
-            console.error("Failed to restore animated canvas component:", restoreErr);
-          }
-        });
 
-        try {
-          const dataUrl = canvas.toDataURL("image/png");
-          setGeneratedImageSrc(dataUrl);
-          setActiveTab("static"); // Switch to static tab automatically so the preview is immediately apparent
-          playDingSound();
-        } catch (error) {
-          console.error("生成海报图片失败:", error);
-          alert("绘制海报发生异常，已退回到动态预览！");
-        } finally {
-          setIsGenerating(false);
-        }
-      }).catch((err) => {
-        console.error("Canvas context generation error:", err);
-        // RESTORE IN FAILURE: Ensure page is always left in an interactive state
-        canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent }) => {
-          try {
-            if (staticImg.parentNode === parent) {
-              parent.replaceChild(origCanvas, staticImg);
+          const allElements = clonedDoc.querySelectorAll("*");
+          allElements.forEach((el) => {
+            if (el instanceof HTMLElement && el.style) {
+              try {
+                const cssText = el.style.cssText;
+                if (cssText.includes("oklch") || cssText.includes("oklab")) {
+                  el.style.cssText = sanitizeCSS(cssText);
+                }
+              } catch (inlineErr) {
+                // Ignore silent issues
+              }
             }
-          } catch (restoreErr) {
-            console.error("Failed to restore animated canvas during failure catch:", restoreErr);
-          }
-        });
-        setIsGenerating(false);
+          });
+        }
       });
-    }, 150);
+
+      // RESTORE STYLES IN PARENT FIRST
+      restoreAllSheets();
+
+      // RESTORE: Put the original live animated canvas elements back into the view immediately
+      canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent }) => {
+        try {
+          if (staticImg.parentNode === parent) {
+            parent.replaceChild(origCanvas, staticImg);
+          }
+        } catch (restoreErr) {
+          console.error("Failed to restore animated canvas component:", restoreErr);
+        }
+      });
+
+      try {
+        const dataUrl = canvas.toDataURL("image/png");
+        setGeneratedImageSrc(dataUrl);
+        setActiveTab("static"); // Switch to static tab automatically so the preview is immediately apparent
+        playDingSound();
+      } catch (error) {
+        console.error("生成海报图片失败:", error);
+        alert("绘制海报发生异常，已退回到动态预览！");
+      } finally {
+        setIsGenerating(false);
+      }
+    } catch (err) {
+      console.error("Canvas context generation error:", err);
+      
+      // RESTORE STYLES IN PARENT IN EVENT OF EXCEPTION
+      restoreAllSheets();
+
+      // RESTORE IN FAILURE: Ensure page is always left in an interactive state
+      canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent }) => {
+        try {
+          if (staticImg.parentNode === parent) {
+            parent.replaceChild(origCanvas, staticImg);
+          }
+        } catch (restoreErr) {
+          console.error("Failed to restore animated canvas during failure catch:", restoreErr);
+        }
+      });
+      setIsGenerating(false);
+    }
   };
 
   const handleCopyClipboardImage = async () => {
@@ -333,7 +664,7 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
 
               {/* Main Title Head */}
               <div className="border-b pb-1.5 mb-2 pr-16 text-left flex-shrink-0" style={{ borderBottomColor: 'rgba(204, 204, 204, 0.4)' }}>
-                <h4 className="text-sm sm:text-base font-serif italic text-[#141414] font-black tracking-tight leading-snug">
+                <h4 className="text-sm sm:text-base font-sans text-[#141414] font-black tracking-tight leading-snug">
                   {art.title}
                 </h4>
                 <span className="text-[9px] font-mono uppercase block tracking-wider font-bold" style={{ color: '#555555' }}>
@@ -359,7 +690,7 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
                       const textConfig = getFontSizeForComment(art.curatorComment);
                       return (
                         <p 
-                          className="font-serif italic font-medium mt-1 p-1 rounded" 
+                          className="font-sans font-medium mt-1 p-1 rounded" 
                           style={{ 
                             fontSize: textConfig.fontSize, 
                             lineHeight: textConfig.lineHeight,
@@ -371,7 +702,7 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
                             color: '#1C1917' 
                           }}
                         >
-                          “{art.curatorComment}”
+                          {art.curatorComment}
                         </p>
                       );
                     })()}
