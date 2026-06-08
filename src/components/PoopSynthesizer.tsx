@@ -100,7 +100,8 @@ export const PoopSynthesizer: React.FC<PoopSynthesizerProps> = ({
 
       setSynthesizedArt(newPiece);
       setLoading(false);
-         } catch (err: any) {
+      setStep("lever_ready");
+    } catch (err: any) {
       console.error(err);
       setErrorMessage("利基传感器在后台对接口时发现网络断连。正在连接本地备用合成矩阵...");
       setLoading(false);

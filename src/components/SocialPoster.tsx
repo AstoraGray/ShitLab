@@ -50,6 +50,50 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
         return;
       }
       
+      // PRE-CAPTURE: Convert the dynamic live <canvas> elements to static high-resolution <img> tags
+      // directly in the active doc just before html2canvas runs. This guarantees that all active textures, 
+      // particle ticks, and custom season overlays currently being rendered are captured with pixel-perfect accuracy.
+      const canvasReplacements: { canvas: HTMLCanvasElement; img: HTMLImageElement; parent: HTMLElement; nextSibling: Node | null }[] = [];
+      const originalCanvases = element.querySelectorAll("canvas");
+      
+      originalCanasLoop: originalCanvases.forEach((origCanvas) => {
+        if (origCanvas instanceof HTMLCanvasElement) {
+          try {
+            const imgUrl = origCanvas.toDataURL("image/png");
+            const staticImg = document.createElement("img");
+            staticImg.src = imgUrl;
+            
+            // Replicate classes and inline style bounds precisely
+            staticImg.className = origCanvas.className;
+            staticImg.style.cssText = origCanvas.style.cssText;
+            staticImg.style.width = "100%";
+            staticImg.style.height = "100%";
+            staticImg.style.maxWidth = "100%";
+            staticImg.style.maxHeight = "100%";
+            
+            // Set layout proportions
+            const widthAttr = origCanvas.getAttribute("width") || "350";
+            const heightAttr = origCanvas.getAttribute("height") || "320";
+            staticImg.setAttribute("width", widthAttr);
+            staticImg.setAttribute("height", heightAttr);
+            
+            const parent = origCanvas.parentNode as HTMLElement;
+            if (parent) {
+              const nextSibling = origCanvas.nextSibling;
+              parent.replaceChild(staticImg, origCanvas);
+              canvasReplacements.push({
+                canvas: origCanvas,
+                img: staticImg,
+                parent,
+                nextSibling
+              });
+            }
+          } catch (canvasErr) {
+            console.error("Failed to temporarily replace live canvas for export:", canvasErr);
+          }
+        }
+      });
+
       html2canvas(element, {
         useCORS: true,
         scale: 2, // High resolution Retinal supersampling
@@ -77,34 +121,19 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
               console.warn("Unable to sanitize cloned style element:", err);
             }
           });
-
-          // CRITICAL: Copy the dynamic <canvas> content from original elements to cloned elements.
-          // Since html2canvas clones DOM nodes recursively, the newly created cloned <canvas> is empty
-          // by default because the browser's graphics buffer is not automatically copied.
-          // We manually map and draw the live canvas pixels from the active document on to the cloned canvases.
-          try {
-            const originalPostcard = document.getElementById("gourmet_printable_postcard");
-            const clonedPostcard = clonedDoc.getElementById("gourmet_printable_postcard");
-            if (originalPostcard && clonedPostcard) {
-              const originalCanvases = originalPostcard.querySelectorAll("canvas");
-              const clonedCanvases = clonedPostcard.querySelectorAll("canvas");
-              originalCanvases.forEach((origCanvas, idx) => {
-                const clonedCanvas = clonedCanvases[idx];
-                if (clonedCanvas && clonedCanvas instanceof HTMLCanvasElement && origCanvas instanceof HTMLCanvasElement) {
-                  clonedCanvas.width = origCanvas.width;
-                  clonedCanvas.height = origCanvas.height;
-                  const clonedCtx = clonedCanvas.getContext("2d");
-                  if (clonedCtx) {
-                    clonedCtx.drawImage(origCanvas, 0, 0);
-                  }
-                }
-              });
-            }
-          } catch (canvasErr) {
-            console.error("Failed to copy original canvas onto cloned canvas inside html2canvas:", canvasErr);
-          }
         }
       }).then((canvas) => {
+        // RESTORE: Put the original live animated canvas elements back into the view immediately
+        canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent, nextSibling }) => {
+          try {
+            if (staticImg.parentNode === parent) {
+              parent.replaceChild(origCanvas, staticImg);
+            }
+          } catch (restoreErr) {
+            console.error("Failed to restore animated canvas component:", restoreErr);
+          }
+        });
+
         try {
           const dataUrl = canvas.toDataURL("image/png");
           setGeneratedImageSrc(dataUrl);
@@ -118,6 +147,16 @@ export const SocialPoster: React.FC<SocialPosterProps> = ({
         }
       }).catch((err) => {
         console.error("Canvas context generation error:", err);
+        // RESTORE IN FAILURE: Ensure page is always left in an interactive state
+        canvasReplacements.forEach(({ canvas: origCanvas, img: staticImg, parent }) => {
+          try {
+            if (staticImg.parentNode === parent) {
+              parent.replaceChild(origCanvas, staticImg);
+            }
+          } catch (restoreErr) {
+            console.error("Failed to restore animated canvas during failure catch:", restoreErr);
+          }
+        });
         setIsGenerating(false);
       });
     }, 150);

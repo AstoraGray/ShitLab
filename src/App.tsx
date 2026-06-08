@@ -324,7 +324,7 @@ export default function App() {
                 className="px-3.5 py-1.5 bg-white border-[2.5px] border-art-charcoal text-art-charcoal rounded-xl shadow-[2.5px_2.5px_0px_#2B2D42] active:translate-y-0.5 active:shadow-none font-black text-xs flex items-center space-x-1.5 transition-all cursor-pointer hover:bg-zinc-100 animate-pulse"
               >
                 <HelpCircle className="w-4 h-4 text-art-red" />
-                <span>正式运营官方版 1.01</span>
+                <span>正式运营官方版 1.02</span>
               </button>
             </div>
 

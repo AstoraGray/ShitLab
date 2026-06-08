@@ -1033,6 +1033,641 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
           ctx.stroke();
           ctx.restore();
         }
+      } else if (shape === "spherical_boba") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 28 + 10;
+          const wOff = getWobbleOffset(depthIdx * 35);
+          drawSegment(cx + wOff, yPos, 28, 28, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+        }
+
+      } else if (shape === "space_station") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        const wOff = getWobbleOffset(25);
+        if (drawCount >= 1) {
+          drawSegment(cx + wOff, cy + 10, 60, 24, baseColor, accentColor, 0, 0.2);
+        }
+        if (drawCount >= 2) {
+          drawSegment(cx + wOff, cy - 20, 36, 18, baseColor, accentColor, 1, 0.5);
+        }
+        if (drawCount >= 3) {
+          ctx.save();
+          ctx.fillStyle = accentColor;
+          ctx.strokeStyle = lightenOrDarkenColor(baseColor, 40);
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.rect(cx + wOff - 105, cy - 4, 45, 12);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.rect(cx + wOff + 60, cy - 4, 45, 12);
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+
+      } else if (shape === "abstract_cube") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 25 + 15;
+          const wOff = getWobbleOffset(depthIdx * 35);
+          const size = 50 - depthIdx * 5;
+          
+          ctx.save();
+          ctx.fillStyle = baseColor;
+          ctx.strokeStyle = lightenOrDarkenColor(baseColor, -30);
+          ctx.lineWidth = 2.5;
+
+          ctx.beginPath();
+          ctx.rect(cx + wOff - size / 2, yPos - size / 2, size, size);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = lightenOrDarkenColor(baseColor, 25);
+          ctx.beginPath();
+          ctx.moveTo(cx + wOff - size / 2, yPos - size / 2);
+          ctx.lineTo(cx + wOff - size / 4, yPos - size / 2 - 12);
+          ctx.lineTo(cx + wOff + size * 0.75, yPos - size / 2 - 12);
+          ctx.lineTo(cx + wOff + size / 2, yPos - size / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = lightenOrDarkenColor(baseColor, -25);
+          ctx.beginPath();
+          ctx.moveTo(cx + wOff + size / 2, yPos - size / 2);
+          ctx.lineTo(cx + wOff + size * 0.75, yPos - size / 2 - 12);
+          ctx.lineTo(cx + wOff + size * 0.75, yPos + size / 2 - 12);
+          ctx.lineTo(cx + wOff + size / 2, yPos + size / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+
+      } else if (shape === "sharp_obelisk") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 32 + 10;
+          const wOff = getWobbleOffset(depthIdx * 30);
+          const rx = 35 - depthIdx * 5;
+          const ry = 14;
+          drawSegment(cx + wOff, yPos, rx, ry, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+        }
+
+      } else if (shape === "cute_octopus") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        const wOff = getWobbleOffset(25);
+        if (drawCount >= 1) {
+          drawSegment(cx + wOff, cy + 12, 55, 20, baseColor, accentColor, 0, 0.1);
+        }
+        if (drawCount >= 2) {
+          ctx.save();
+          ctx.strokeStyle = baseColor;
+          ctx.lineWidth = 6;
+          ctx.lineCap = "round";
+          for (let t = 0; t < 6; t++) {
+            const angle = (t * Math.PI) / 5;
+            const tx = cx + wOff + Math.cos(angle) * 45;
+            const ty = cy + 12 + Math.abs(Math.sin(angle)) * 12;
+            ctx.beginPath();
+            ctx.moveTo(cx + wOff, cy + 12);
+            ctx.quadraticCurveTo(tx, ty + 10 + Math.sin(time * 3 + t) * 6, tx + Math.cos(time + t) * 10, ty + 15);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+        if (drawCount >= 3) {
+          drawSegment(cx + wOff, cy - 20, 35, 32, baseColor, accentColor, 2, 0.6);
+          ctx.save();
+          ctx.fillStyle = "#FFF";
+          ctx.beginPath();
+          ctx.arc(cx + wOff - 10, cy - 22, 6, 0, Math.PI * 2);
+          ctx.arc(cx + wOff + 10, cy - 22, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#000";
+          ctx.beginPath();
+          ctx.arc(cx + wOff - 9 + Math.sin(time) * 1.5, cy - 21, 3, 0, Math.PI * 2);
+          ctx.arc(cx + wOff + 11 + Math.sin(time) * 1.5, cy - 21, 3, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+      } else if (shape === "rose_bud") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 20;
+          const wOff = getWobbleOffset(depthIdx * 25);
+          const radius = 55 - depthIdx * 6;
+          drawSegment(cx + wOff, yPos, radius, radius * 0.5, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+          
+          ctx.save();
+          ctx.strokeStyle = lightenOrDarkenColor(baseColor, 40);
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(cx + wOff, yPos - 4, radius * 0.7, 0.1 * depthIdx, Math.PI + i);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+      } else if (shape === "twisted_pretzel") {
+        const wOff = getWobbleOffset(20);
+        ctx.save();
+        ctx.strokeStyle = baseColor;
+        ctx.lineWidth = 14;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 40, cy - 10);
+        ctx.quadraticCurveTo(cx + wOff - 65, cy + 25, cx + wOff - 10, cy + 15);
+        ctx.quadraticCurveTo(cx + wOff, cy, cx + wOff + 10, cy + 15);
+        ctx.quadraticCurveTo(cx + wOff + 65, cy + 25, cx + wOff + 40, cy - 10);
+        ctx.quadraticCurveTo(cx + wOff + 20, cy - 40, cx + wOff, cy - 15);
+        ctx.quadraticCurveTo(cx + wOff - 20, cy - 40, cx + wOff - 40, cy - 10);
+        ctx.stroke();
+        
+        ctx.lineWidth = 18;
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -25);
+        ctx.fillStyle = "#FFF";
+        for (let s = 0; s < 7; s++) {
+          const sX = cx + wOff + Math.sin(s * 2.3) * 45;
+          const sY = cy + Math.cos(s * 1.8) * 18;
+          ctx.beginPath();
+          ctx.rect(sX - 3, sY - 3, 6, 6);
+          ctx.fill();
+        }
+        ctx.restore();
+
+      } else if (shape === "golden_pyramid") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 25 + 15;
+          const wOff = getWobbleOffset(depthIdx * 30);
+          const size = 110 * ((count - depthIdx) / count);
+          
+          ctx.save();
+          ctx.fillStyle = baseColor;
+          ctx.strokeStyle = lightenOrDarkenColor(baseColor, -30);
+          ctx.lineWidth = 2.5;
+
+          ctx.beginPath();
+          ctx.moveTo(cx + wOff, yPos - 12);
+          ctx.lineTo(cx + wOff - size / 2, yPos + 12);
+          ctx.lineTo(cx + wOff + size / 2, yPos + 12);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = lightenOrDarkenColor(baseColor, -25);
+          ctx.beginPath();
+          ctx.moveTo(cx + wOff, yPos - 12);
+          ctx.lineTo(cx + wOff + size / 2, yPos + 12);
+          ctx.lineTo(cx + wOff + size * 0.1, yPos + 12);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+      } else if (shape === "lucky_bag") {
+        const wOff = getWobbleOffset(25);
+        drawSegment(cx + wOff, cy + 15, 65, 30, baseColor, accentColor, 0, 0.1);
+        drawSegment(cx + wOff, cy - 10, 48, 24, baseColor, accentColor, 1, 0.4);
+        
+        ctx.save();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#FFDF00";
+        ctx.beginPath();
+        ctx.arc(cx + wOff, cy - 14, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.ellipse(cx + wOff - 12, cy - 14, 10, 5, -Math.PI / 6, 0, Math.PI * 2);
+        ctx.ellipse(cx + wOff + 12, cy - 14, 10, 5, Math.PI / 6, 0, Math.PI * 2);
+        ctx.fillStyle = "#FFDF00";
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+      } else if (shape === "curvy_chili") {
+        const wOff = getWobbleOffset(25);
+        ctx.save();
+        ctx.fillStyle = baseColor;
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -35);
+        ctx.lineWidth = 3.5;
+        
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 22, cy - 65);
+        ctx.bezierCurveTo(
+          cx + wOff + 35, cy - 25,
+          cx + wOff + 45, cy + 25,
+          cx + wOff - 15, cy + 38
+        );
+        ctx.bezierCurveTo(
+          cx + wOff + 18, cy + 18,
+          cx + wOff + 22, cy - 20,
+          cx + wOff + 12, cy - 65
+        );
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = "#48BB78";
+        ctx.strokeStyle = "#22543D";
+        ctx.beginPath();
+        ctx.ellipse(cx + wOff - 5, cy - 66, 12, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 5, cy - 66);
+        ctx.quadraticCurveTo(cx + wOff - 12, cy - 82, cx + wOff - 8, cy - 86);
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+
+      } else if (shape === "gear_wheel") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        const wOff = getWobbleOffset(30);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 25 + 10;
+          const radius = 55 - depthIdx * 6;
+          
+          ctx.save();
+          ctx.fillStyle = baseColor;
+          ctx.strokeStyle = lightenOrDarkenColor(baseColor, -35);
+          ctx.lineWidth = 3;
+          
+          ctx.beginPath();
+          ctx.arc(cx + wOff, yPos, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          
+          const teeth = 8;
+          ctx.fillStyle = baseColor;
+          ctx.strokeStyle = lightenOrDarkenColor(baseColor, -35);
+          ctx.lineWidth = 3;
+          for (let t = 0; t < teeth; t++) {
+            const angle = (t * Math.PI * 2) / teeth + time;
+            const tx = cx + wOff + Math.cos(angle) * (radius + 4);
+            const ty = yPos + Math.sin(angle) * (radius + 4);
+            ctx.beginPath();
+            ctx.arc(tx, ty, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+      } else if (shape === "spiral_stair") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const angle = (depthIdx * Math.PI * 2) / 8 + time;
+          const xPos = cx + Math.cos(angle) * 35 + getWobbleOffset(depthIdx * 20);
+          const yPos = cy - depthIdx * 20;
+          drawSegment(xPos, yPos, 45 - depthIdx * 1.5, 12, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+        }
+
+      } else if (shape === "cactus_pillar") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        const wOff = getWobbleOffset(30);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 24 + 10;
+          drawSegment(cx + wOff, yPos, 28, 14, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+        }
+        if (drawCount >= 3) {
+          drawSegment(cx + wOff - 35, cy - 35, 12, 22, "#38A169", "#22543D", 1, 0.5);
+        }
+        if (drawCount >= 4) {
+          drawSegment(cx + wOff + 35, cy - 55, 12, 22, "#48BB78", "#22543D", 2, 0.6);
+        }
+
+      } else if (shape === "leaning_tower") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const leaningOffset = -depthIdx * 5.5;
+          const yPos = cy - depthIdx * 24 + 10;
+          const wOff = getWobbleOffset(depthIdx * 30);
+          const rx = 44 - depthIdx * 2.5;
+          const ry = 14;
+          drawSegment(cx + leaningOffset + wOff, yPos, rx, ry, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+        }
+
+      } else if (shape === "chess_knight") {
+        const wOff = getWobbleOffset(25);
+        ctx.save();
+        ctx.fillStyle = baseColor;
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -45);
+        ctx.lineWidth = 4;
+        
+        ctx.beginPath();
+        ctx.ellipse(cx + wOff, cy + 24, 55, 12, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 25, cy + 20);
+        ctx.quadraticCurveTo(cx + wOff - 35, cy - 35, cx + wOff - 15, cy - 65);
+        ctx.quadraticCurveTo(cx + wOff - 5, cy - 80, cx + wOff + 15, cy - 65);
+        ctx.quadraticCurveTo(cx + wOff + 38, cy - 55, cx + wOff + 10, cy - 35);
+        ctx.quadraticCurveTo(cx + wOff - 5, cy - 30, cx + wOff, cy - 4);
+        ctx.quadraticCurveTo(cx + wOff + 25, cy + 5, cx + wOff + 25, cy + 20);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = baseColor;
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 18, cy - 64);
+        ctx.lineTo(cx + wOff - 24, cy - 82);
+        ctx.lineTo(cx + wOff - 10, cy - 68);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = "#FFF";
+        ctx.beginPath();
+        ctx.arc(cx + wOff - 2, cy - 56, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(cx + wOff - 1.5, cy - 55.5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+      } else if (shape === "ancient_totem") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 26 + 10;
+          const wOff = getWobbleOffset(depthIdx * 30);
+          drawSegment(cx + wOff, yPos, 36, 14, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+          
+          ctx.save();
+          ctx.fillStyle = accentColor;
+          ctx.fillRect(cx + wOff - 18, yPos - 5, 8, 4);
+          ctx.fillRect(cx + wOff + 10, yPos - 5, 8, 4);
+          ctx.fillRect(cx + wOff - 10, yPos + 3, 20, 3);
+          ctx.restore();
+        }
+
+      } else if (shape === "gourmet_croissant") {
+        const wOff = getWobbleOffset(25);
+        const croissantTiers = 5;
+        for (let i = 0; i < croissantTiers; i++) {
+          const depth = croissantTiers - 1 - i;
+          const yPos = cy + 18 - depth * 14;
+          const rx = 65 - depth * 10;
+          const ry = 22 - depth * 3;
+          drawSegment(cx + wOff, yPos, rx, ry, baseColor, accentColor, depth, depth / croissantTiers);
+        }
+
+      } else if (shape === "pagoda_spire") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const depthIdx = count - 1 - i;
+          const yPos = cy - depthIdx * 25 + 15;
+          const wOff = getWobbleOffset(depthIdx * 30);
+          const baseScale = (count - depthIdx) / count;
+          const rx = 55 * baseScale + 12;
+          const ry = 12;
+          
+          drawSegment(cx + wOff, yPos, rx, ry, baseColor, accentColor, depthIdx, depthIdx / (count || 1));
+          
+          ctx.save();
+          ctx.fillStyle = accentColor;
+          ctx.beginPath();
+          ctx.moveTo(cx + wOff - rx, yPos);
+          ctx.quadraticCurveTo(cx + wOff - rx - 8, yPos - 12, cx + wOff - rx - 14, yPos - 10);
+          ctx.lineTo(cx + wOff - rx + 4, yPos + 2);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(cx + wOff + rx, yPos);
+          ctx.quadraticCurveTo(cx + wOff + rx + 8, yPos - 12, cx + wOff + rx + 14, yPos - 10);
+          ctx.lineTo(cx + wOff + rx - 4, yPos + 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+      } else if (shape === "infinity_loop") {
+        const holdingDays = art.holdingDays || 0;
+        const count = getMaximumSegmentsCount(shape, holdingDays);
+        let drawCount = vCount === undefined ? count : Math.min(vCount, count);
+        for (let i = 0; i < drawCount; i++) {
+          const angle = (i * Math.PI * 2) / count + time;
+          const loopX = cx + Math.sin(angle * 2) * 45 + getWobbleOffset(i * 15);
+          const loopY = cy + Math.sin(angle) * 25 + 8;
+          drawSegment(loopX, loopY, 24, 18, baseColor, accentColor, i, i / count);
+        }
+
+      } else if (shape === "thor_hammer") {
+        const wOff = getWobbleOffset(30);
+        ctx.save();
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -40);
+        ctx.lineWidth = 4;
+        
+        ctx.fillStyle = "#718096";
+        ctx.fillRect(cx + wOff - 5, cy + 2, 10, 42);
+        ctx.strokeRect(cx + wOff - 5, cy + 2, 10, 42);
+        
+        ctx.fillStyle = baseColor;
+        ctx.beginPath();
+        ctx.rect(cx + wOff - 50, cy - 42, 100, 44);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = lightenOrDarkenColor(baseColor, 30);
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 50, cy - 42);
+        ctx.lineTo(cx + wOff - 55, cy - 35);
+        ctx.lineTo(cx + wOff - 55, cy - 7);
+        ctx.lineTo(cx + wOff - 50, cy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff + 50, cy - 42);
+        ctx.lineTo(cx + wOff + 55, cy - 35);
+        ctx.lineTo(cx + wOff + 55, cy - 7);
+        ctx.lineTo(cx + wOff + 50, cy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = "#63B3ED";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 20, cy - 26);
+        ctx.lineTo(cx + wOff - 5, cy - 14);
+        ctx.lineTo(cx + wOff + 8, cy - 28);
+        ctx.lineTo(cx + wOff + 25, cy - 16);
+        ctx.stroke();
+        ctx.restore();
+
+      } else if (shape === "origami_crane") {
+        const wOff = getWobbleOffset(25);
+        ctx.save();
+        ctx.fillStyle = baseColor;
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -35);
+        ctx.lineWidth = 3.5;
+        
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff, cy - 35);
+        ctx.lineTo(cx + wOff - 45, cy + 10);
+        ctx.lineTo(cx + wOff, cy - 2);
+        ctx.lineTo(cx + wOff + 45, cy + 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff, cy - 35);
+        ctx.lineTo(cx + wOff, cy - 2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff, cy - 10);
+        ctx.lineTo(cx + wOff - 38, cy - 26);
+        ctx.lineTo(cx + wOff - 44, cy - 22);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff, cy - 10);
+        ctx.lineTo(cx + wOff + 36, cy - 28);
+        ctx.stroke();
+        ctx.restore();
+
+      } else if (shape === "volcanic_caldera") {
+        const wOff = getWobbleOffset(30);
+        ctx.save();
+        ctx.fillStyle = baseColor;
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -40);
+        ctx.lineWidth = 4;
+        
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 75, cy + 24);
+        ctx.lineTo(cx + wOff - 28, cy - 28);
+        ctx.lineTo(cx + wOff + 28, cy - 28);
+        ctx.lineTo(cx + wOff + 75, cy + 24);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = "#FF5500";
+        ctx.strokeStyle = "#FFFF00";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(cx + wOff, cy - 28, 22, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+      } else if (shape === "cathedral_dome") {
+        const wOff = getWobbleOffset(25);
+        ctx.save();
+        ctx.fillStyle = baseColor;
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -40);
+        ctx.lineWidth = 4;
+        
+        ctx.beginPath();
+        ctx.ellipse(cx + wOff, cy + 18, 64, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.ellipse(cx + wOff, cy + 2, 54, 44, 0, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, 30);
+        ctx.lineWidth = 2;
+        for (let r = -2; r <= 2; r++) {
+          ctx.beginPath();
+          ctx.ellipse(cx + wOff, cy + 2, Math.abs(r) * 16, 44, 0, Math.PI, 0);
+          ctx.stroke();
+        }
+        
+        ctx.strokeStyle = "#FFDF00";
+        ctx.lineWidth = 3.5;
+        const spyY = cy - 42;
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff, spyY);
+        ctx.lineTo(cx + wOff, spyY - 18);
+        ctx.moveTo(cx + wOff - 6, spyY - 12);
+        ctx.lineTo(cx + wOff + 6, spyY - 12);
+        ctx.stroke();
+        ctx.restore();
+
+      } else if (shape === "fortune_cookie") {
+        const wOff = getWobbleOffset(20);
+        ctx.save();
+        ctx.fillStyle = baseColor;
+        ctx.strokeStyle = lightenOrDarkenColor(baseColor, -35);
+        ctx.lineWidth = 3.5;
+        
+        ctx.beginPath();
+        ctx.ellipse(cx + wOff - 18, cy + 4, 32, 22, -Math.PI / 10, 0, Math.PI * 2);
+        ctx.ellipse(cx + wOff + 18, cy + 4, 32, 22, Math.PI / 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = "#FFFFF8";
+        ctx.strokeStyle = "#A0AEC0";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.rect(cx + wOff - 15, cy - 24, 35, 12);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.strokeStyle = "#4A5568";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(cx + wOff - 10, cy - 18);
+        ctx.lineTo(cx + wOff + 12, cy - 18);
+        ctx.moveTo(cx + wOff - 8, cy - 14);
+        ctx.lineTo(cx + wOff + 8, cy - 14);
+        ctx.stroke();
+        ctx.restore();
       }
 
       // 4. DRAW EXTRA SPECIAL EFFECTS (Steam, glint sparklers, velvet barrier bounds)
@@ -1106,6 +1741,54 @@ export const PoopRenderer: React.FC<PoopRendererProps> = ({
           currentSpireY = cy - 50 + 10;
         } else if (shape === "ring_doughnut") {
           currentSpireY = cy - 35 + 10;
+        } else if (shape === "spherical_boba") {
+          currentSpireY = cy - maxSegments * 28 + 10;
+        } else if (shape === "space_station") {
+          currentSpireY = cy - 20 + 10;
+        } else if (shape === "abstract_cube") {
+          currentSpireY = cy - maxSegments * 25 + 10;
+        } else if (shape === "sharp_obelisk") {
+          currentSpireY = cy - maxSegments * 32 + 10;
+        } else if (shape === "cute_octopus") {
+          currentSpireY = cy - 20 + 10;
+        } else if (shape === "rose_bud") {
+          currentSpireY = cy - maxSegments * 20 + 10;
+        } else if (shape === "twisted_pretzel") {
+          currentSpireY = cy - 15 + 10;
+        } else if (shape === "golden_pyramid") {
+          currentSpireY = cy - maxSegments * 25 + 10;
+        } else if (shape === "lucky_bag") {
+          currentSpireY = cy - 10 + 10;
+        } else if (shape === "curvy_chili") {
+          currentSpireY = cy - 65 + 10;
+        } else if (shape === "gear_wheel") {
+          currentSpireY = cy - maxSegments * 25 + 10;
+        } else if (shape === "spiral_stair") {
+          currentSpireY = cy - maxSegments * 20 + 10;
+        } else if (shape === "cactus_pillar") {
+          currentSpireY = cy - maxSegments * 24 + 10;
+        } else if (shape === "leaning_tower") {
+          currentSpireY = cy - maxSegments * 24 + 10;
+        } else if (shape === "chess_knight") {
+          currentSpireY = cy - 82 + 10;
+        } else if (shape === "ancient_totem") {
+          currentSpireY = cy - maxSegments * 26 + 10;
+        } else if (shape === "gourmet_croissant") {
+          currentSpireY = cy + 18 - 4 * 14 + 10;
+        } else if (shape === "pagoda_spire") {
+          currentSpireY = cy - maxSegments * 25 + 10;
+        } else if (shape === "infinity_loop") {
+          currentSpireY = cy - 25 + 10;
+        } else if (shape === "thor_hammer") {
+          currentSpireY = cy - 42 + 10;
+        } else if (shape === "origami_crane") {
+          currentSpireY = cy - 35 + 10;
+        } else if (shape === "volcanic_caldera") {
+          currentSpireY = cy - 28 + 10;
+        } else if (shape === "cathedral_dome") {
+          currentSpireY = cy - 42 + 10;
+        } else if (shape === "fortune_cookie") {
+          currentSpireY = cy - 24 + 10;
         }
 
         const topOffsetPercent = currentSpireY - 14;
