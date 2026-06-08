@@ -446,7 +446,7 @@ export default function App() {
           “You are what you eat... literally.”
         </p>
         <p className="text-[11px] text-zinc-500 font-medium tracking-wide">
-          创作者：QuQu鼠辈、AstoraGray
+          创作者：AstoraGray & QuQu
         </p>
       </footer>
 
