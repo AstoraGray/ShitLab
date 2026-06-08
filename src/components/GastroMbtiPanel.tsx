@@ -914,180 +914,183 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
             </div>
 
             {/* PRINT POSTER ELEMENT MOUNT POINT */}
-            <div className="w-full flex justify-center">
-              <div 
-                ref={posterRef}
-                id="gourmet_printable_mbti_poster"
-                className="w-[370px] bg-[#0C0D11] text-zinc-100 rounded-2xl p-5 border-[4px] border-solid relative overflow-hidden flex flex-col justify-between space-y-4 shadow-[0_25px_60px_rgba(0,0,0,0.95)] font-sans"
-                style={{ height: "660px", borderColor: "#1F2028" }}
-              >
-                {/* Visual grid decor border inside the poster */}
-                <div className="absolute inset-2 border rounded-xl pointer-events-none z-0" style={{ borderColor: "rgba(161, 161, 170, 0.08)" }} />
+            <div className="w-full flex items-center justify-center overflow-visible py-4 min-h-[580px]">
+              {/* Outer Scale Wrapper: Safely scales the fixed-width 375px poster card to perfectly fit small mobile screens with origin-center preservation */}
+              <div className="transform scale-[0.78] xs:scale-[0.85] sm:scale-95 md:scale-100 origin-center flex-shrink-0 transition-all duration-300">
                 <div 
-                  className="absolute top-0 right-0 w-44 h-44 pointer-events-none z-0" 
-                  style={{ background: "radial-gradient(circle at top right, rgba(161, 161, 170, 0.06) 0%, transparent 70%)" }}
-                />
-                <div 
-                  className="absolute bottom-0 left-0 w-44 h-44 pointer-events-none z-0" 
-                  style={{ background: "radial-gradient(circle at bottom left, rgba(161, 161, 170, 0.04) 0%, transparent 70%)" }}
-                />
-
-                {/* Print Fleur Corners */}
-                <div className="absolute top-4 left-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
-                <div className="absolute top-4 right-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
-                <div className="absolute bottom-4 left-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
-                <div className="absolute bottom-4 right-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
-
-                {/* 1. Header Branded */}
-                <div className="border-b-[1.5px] pb-2.5 text-center relative z-10" style={{ borderColor: "rgba(161, 161, 170, 0.1)" }}>
-                  <span className="text-[7.5px] font-mono uppercase tracking-widest text-zinc-450 font-bold block" style={{ color: "#8E919E" }}>
-                    MUSÉE DU GASTRO-LOUVRE • ROYAL ARCHIVE
-                  </span>
-                  <h4 className="text-sm font-sans font-extrabold text-zinc-100 tracking-wider flex items-center justify-center gap-1.5 mt-0.5">
-                    ✦ 皇家大屎馆 胃肠理化鉴定档案 ✦
-                  </h4>
-                  <p className="text-[7.5px] font-mono text-zinc-350 font-bold tracking-tight mt-1 max-w-[170px] mx-auto py-0.5 rounded border" style={{ backgroundColor: "rgba(255, 255, 255, 0.02)", borderColor: "rgba(255, 255, 255, 0.08)", color: "#A1A1AA" }}>
-                    CLASSIFIED MBTI METABOLISM DOSSIER
-                  </p>
-                </div>
-
-                {/* 2. Visual Top Highlight (Masterpiece artifact spotlighted in C-Position) */}
-                <div className="relative z-10 flex flex-col items-center justify-center p-3 rounded-xl bg-[#111218] border shadow-inner min-h-[220px] text-center overflow-hidden" style={{ borderColor: "rgba(161, 161, 170, 0.08)" }}>
-                  {/* Top-down dramatic gallery spotlight projection effect - matching quality with custom palace light colors */}
+                  ref={posterRef}
+                  id="gourmet_printable_mbti_poster"
+                  className="bg-[#0C0D11] text-zinc-100 rounded-2xl p-4 border-[4px] border-solid relative overflow-hidden flex flex-col justify-between shadow-[0_25px_60px_rgba(0,0,0,0.95)] font-sans"
+                  style={{ width: "375px", minWidth: "375px", height: "667px", minHeight: "667px", borderColor: "#1F2028", flexShrink: 0 }}
+                >
+                  {/* Visual grid decor border inside the poster */}
+                  <div className="absolute inset-2 border rounded-xl pointer-events-none z-0" style={{ borderColor: "rgba(161, 161, 170, 0.08)" }} />
                   <div 
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 pointer-events-none z-0" 
-                    style={{ 
-                      background: spotlightTheme.beam,
-                      clipPath: "polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)"
-                    }}
+                    className="absolute top-0 right-0 w-44 h-44 pointer-events-none z-0" 
+                    style={{ background: "radial-gradient(circle at top right, rgba(161, 161, 170, 0.06) 0%, transparent 70%)" }}
                   />
-                  {/* Subtle ambient lens flare core right behind the artifact - custom color-coded */}
                   <div 
-                    className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full pointer-events-none z-15" 
-                    style={{ background: spotlightTheme.flare }}
+                    className="absolute bottom-0 left-0 w-44 h-44 pointer-events-none z-0" 
+                    style={{ background: "radial-gradient(circle at bottom left, rgba(161, 161, 170, 0.04) 0%, transparent 70%)" }}
                   />
-                  
-                  <span className="absolute top-2 left-2.5 text-[7px] font-sans font-bold border px-1.5 py-0.5 rounded z-10" style={{ backgroundColor: spotlightTheme.badgeBg, borderColor: spotlightTheme.badgeBorder, color: spotlightTheme.badgeText }}>
-                    {spotlightTheme.label}
-                  </span>
-                  
-                  <div className="w-32 h-32 select-none relative mb-1.5 mt-2 flex items-center justify-center z-10">
-                    {/* Render live feces graphics dynamically - upscale to a grandiose scale of [1.3] */}
-                    <PoopRenderer art={cPositionExhibit} interactive={false} className="transform scale-[1.3] transition-all duration-300" />
-                  </div>
 
-                  <strong className="text-xs text-zinc-100 uppercase font-sans font-extrabold truncate max-w-[280px] pb-1 block leading-normal z-10">
-                    {cPositionExhibit.title}
-                  </strong>
-                  <p className="text-[8px] text-zinc-400 font-mono mt-0.5 z-10">
-                    主厨艺术家：<strong className="text-amber-400 font-sans font-bold">{artistName}</strong> • 理化肌理：<strong className="text-zinc-200">{cPositionExhibit.textureType || "晶冕砂浆"}</strong>
-                  </p>
-                </div>
+                  {/* Print Fleur Corners */}
+                  <div className="absolute top-4 left-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
+                  <div className="absolute top-4 right-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
+                  <div className="absolute bottom-4 left-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
+                  <div className="absolute bottom-4 right-4 text-[8px] z-10" style={{ color: "rgba(161, 161, 170, 0.12)" }}>⚜</div>
 
-                {/* 3. Sub-container with dual stats: Radar plot + Typology */}
-                <div className="flex gap-3 relative z-10 items-stretch font-sans">
-                  
-                  {/* Left stats: Radar - widened and optimized padding */}
-                  <div className="w-[150px] shrink-0 bg-[#111218] border rounded-xl p-2 px-1 flex flex-col items-center justify-center" style={{ borderColor: 'rgba(161, 161, 170, 0.08)' }}>
-                    <span className="text-[6.5px] font-sans text-zinc-300 font-bold tracking-wider mb-1 block">
-                      肠胃理化象限图
+                  {/* 1. Header Branded */}
+                  <div className="border-b-[1.5px] pb-2 text-center relative z-10" style={{ borderColor: "rgba(161, 161, 170, 0.1)" }}>
+                    <span className="text-[7.5px] font-mono uppercase tracking-widest text-zinc-450 font-bold block" style={{ color: "#8E919E" }}>
+                      MUSÉE DU GASTRO-LOUVRE • ROYAL ARCHIVE
                     </span>
-                    <div className="w-[134px] h-[134px] relative select-none flex items-center justify-center">
-                      <svg width="100%" height="100%" viewBox="-35 -15 270 230" className="overflow-visible">
-                        {levels.map((lvl, index) => {
-                          const gridR = R * lvl;
-                          return (
-                            <polygon
-                              key={index}
-                              points={`${center},${center - gridR} ${center + gridR},${center} ${center},${center + gridR} ${center - gridR},${center}`}
-                              fill="none"
-                              stroke="rgba(161, 161, 170, 0.15)"
-                              strokeWidth="1.2"
-                              strokeDasharray={index < 2 ? "3,3" : "none"}
-                            />
-                          );
-                        })}
-                        <line x1={center} y1={center - R} x2={center} y2={center + R} stroke="rgba(161, 161, 170, 0.15)" strokeWidth="1" />
-                        <line x1={center - R} y1={center} x2={center + R} y2={center} stroke="rgba(161, 161, 170, 0.15)" strokeWidth="1" />
-                        <polygon
-                          points={mbtiPointsStr}
-                          fill="rgba(255, 255, 255, 0.08)"
-                          stroke="#E4E4E7"
-                          strokeWidth="2.5"
-                        />
-                        <text x={center} y={center - R - 8} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="middle">憋/H</text>
-                        <text x={center + R + 14} y={center + 4} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="start">肉/M</text>
-                        <text x={center} y={center + R + 16} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="middle">固/D</text>
-                        <text x={center - R - 14} y={center + 4} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="end">辣/S</text>
-                      </svg>
-                    </div>
+                    <h4 className="text-sm font-sans font-extrabold text-zinc-100 tracking-wider flex items-center justify-center gap-1.5 mt-0.5">
+                      ✦ 皇家大屎馆 胃肠理化鉴定档案 ✦
+                    </h4>
+                    <p className="text-[7.5px] font-mono text-zinc-350 font-bold tracking-tight mt-1 max-w-[170px] mx-auto py-0.5 rounded border" style={{ backgroundColor: "rgba(255, 255, 255, 0.02)", borderColor: "rgba(255, 255, 255, 0.08)", color: "#A1A1AA" }}>
+                      CLASSIFIED MBTI METABOLISM DOSSIER
+                    </p>
                   </div>
 
-                  {/* Right stats: Title cards - safe height spacing with no clipping overflow */}
-                  <div className="flex-1 min-w-0 bg-[#111218] border rounded-xl p-2.5 flex flex-col justify-between text-left" style={{ borderColor: 'rgba(161, 161, 170, 0.08)' }}>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[14px] font-mono font-black tracking-tight text-zinc-100 border px-1.5 py-1.2 rounded animate-pulse" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.15)' }}>
-                          {activeProfile.key}
-                        </span>
-                        <div className="flex flex-col min-w-0 justify-center pl-1">
-                          <h4 className="text-[12px] font-sans font-black text-white block leading-[1.4] py-0.5">
-                            {activeProfile.title}
-                          </h4>
-                          <span className="text-[7.5px] font-mono text-zinc-500 block leading-[1.3]">{activeProfile.englishTitle}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Substring-based programmatic truncation to perfectly prevent canvas multi-line clipping */}
-                      <p className="text-[8px] font-semibold text-zinc-300 leading-normal font-sans mt-2.5 pb-1 select-text">
-                        “{activeProfile.description.length > 95 ? activeProfile.description.slice(0, 93) + "..." : activeProfile.description}”
-                      </p>
-                    </div>
-
-                    <div className="text-[6.5px] text-zinc-400 border-t pt-1 mt-1 font-sans flex justify-between items-center" style={{ borderTopColor: 'rgba(161, 161, 170, 0.08)' }}>
-                      <span>主厨学者：<strong className="text-[#F3E0B5] font-bold">{artistName}</strong></span>
-                      <span>报告签批：学术资产委员会</span>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* 4. Speed Match compatibility & Pure HTML sharp vector QR container */}
-                <div className="flex justify-between items-center z-10 relative pt-2.5 border-t w-full" style={{ borderTopColor: 'rgba(161, 161, 170, 0.1)' }}>
-                  {/* Left Column compatibility with rigid explicit widths preventing layout overlaps on canvas */}
-                  <div className="w-[220px] shrink-0 space-y-1.5 text-left">
-                    <span className="text-[7.5px] font-sans text-zinc-400 font-bold block">
-                      🍴 COLLABORATIVE SPEED-DATING MATCH
+                  {/* 2. Visual Top Highlight (Masterpiece artifact spotlighted in C-Position) */}
+                  <div className="relative z-10 flex flex-col items-center justify-center p-2 rounded-xl bg-[#111218] border shadow-inner h-[202px] text-center overflow-hidden" style={{ borderColor: "rgba(161, 161, 170, 0.08)" }}>
+                    {/* Top-down dramatic gallery spotlight projection effect - matching quality with custom palace light colors */}
+                    <div 
+                      className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 pointer-events-none z-0" 
+                      style={{ 
+                        background: spotlightTheme.beam,
+                        clipPath: "polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)"
+                      }}
+                    />
+                    {/* Subtle ambient lens flare core right behind the artifact - custom color-coded */}
+                    <div 
+                      className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full pointer-events-none z-15" 
+                      style={{ background: spotlightTheme.flare }}
+                    />
+                    
+                    <span className="absolute top-2 left-2.5 text-[7px] font-sans font-bold border px-1.5 py-0.5 rounded z-10" style={{ backgroundColor: spotlightTheme.badgeBg, borderColor: spotlightTheme.badgeBorder, color: spotlightTheme.badgeText }}>
+                      {spotlightTheme.label}
                     </span>
                     
-                    <div className="flex gap-2 text-[8px] font-black w-full">
-                      <div className="flex-1 min-w-0 p-1 px-1.5 rounded border" style={{ backgroundColor: 'rgba(16, 185, 129, 0.05)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
-                        <span className="text-emerald-400 block text-[6.5px] leading-normal pb-0.5">绝配天作 MATCH 🏆</span>
-                        <span className="text-white block truncate text-[8.5px] max-w-[95px] leading-normal pb-1 font-semibold">{activeProfile.bestMatchTitle.replace(/【|】/g, "")}</span>
+                    <div className="w-28 h-28 select-none relative mb-1 flex items-center justify-center z-10">
+                      {/* Render live feces graphics dynamically - upscale to a grandiose scale of [1.2] */}
+                      <PoopRenderer art={cPositionExhibit} interactive={false} className="transform scale-[1.2] transition-all duration-300" />
+                    </div>
+
+                    <strong className="text-[11px] text-zinc-100 uppercase font-sans font-extrabold truncate max-w-[300px] pb-0.5 block leading-normal z-10">
+                      {cPositionExhibit.title}
+                    </strong>
+                    <p className="text-[8px] text-zinc-400 font-mono z-10 leading-none">
+                      主厨艺术家：<strong className="text-amber-400 font-sans font-bold">{artistName}</strong> • 理化肌理：<strong className="text-zinc-200">{cPositionExhibit.textureType || "晶冕砂浆"}</strong>
+                    </p>
+                  </div>
+
+                  {/* 3. Sub-container with dual stats: Radar plot + Typology */}
+                  <div className="h-[174px] flex gap-3 relative z-10 items-stretch font-sans">
+                    
+                    {/* Left stats: Radar - Widened and optimized viewBox to eliminate empty padding and maximize radar display size */}
+                    <div className="w-[155px] shrink-0 bg-[#111218] border rounded-xl p-2 px-1 flex flex-col items-center justify-center" style={{ borderColor: "rgba(161, 161, 170, 0.08)" }}>
+                      <span className="text-[7px] font-sans text-zinc-300 font-extrabold tracking-wider mb-1 block">
+                        肠胃理化象限图
+                      </span>
+                      <div className="w-[130px] h-[130px] relative select-none flex items-center justify-center">
+                        <svg width="100%" height="100%" viewBox="-10 0 220 210" className="overflow-visible">
+                          {levels.map((lvl, index) => {
+                            const gridR = R * lvl;
+                            return (
+                              <polygon
+                                key={index}
+                                points={`${center},${center - gridR} ${center + gridR},${center} ${center},${center + gridR} ${center - gridR},${center}`}
+                                fill="none"
+                                stroke="rgba(161, 161, 170, 0.15)"
+                                strokeWidth="1.2"
+                                strokeDasharray={index < 2 ? "3,3" : "none"}
+                              />
+                            );
+                          })}
+                          <line x1={center} y1={center - R} x2={center} y2={center + R} stroke="rgba(161, 161, 170, 0.15)" strokeWidth="1" />
+                          <line x1={center - R} y1={center} x2={center + R} y2={center} stroke="rgba(161, 161, 170, 0.15)" strokeWidth="1" />
+                          <polygon
+                            points={mbtiPointsStr}
+                            fill="rgba(255, 255, 255, 0.08)"
+                            stroke="#E4E4E7"
+                            strokeWidth="2.5"
+                          />
+                          <text x={center} y={center - R - 6} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="middle">憋/H</text>
+                          <text x={center + R + 6} y={center + 4} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="start">肉/M</text>
+                          <text x={center} y={center + R + 14} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="middle">固/D</text>
+                          <text x={center - R - 6} y={center + 4} fill="#A1A1AA" fontSize="12" fontWeight="bold" textAnchor="end">辣/S</text>
+                        </svg>
                       </div>
+                    </div>
+
+                    {/* Right stats: Title cards - safe height spacing with no clipping overflow */}
+                    <div className="flex-1 min-w-0 bg-[#111218] border rounded-xl p-2.5 flex flex-col justify-between text-left" style={{ borderColor: "rgba(161, 161, 170, 0.08)" }}>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[14px] font-mono font-black tracking-tight text-zinc-100 border px-1.5 py-0.5 rounded animate-pulse" style={{ backgroundColor: "rgba(255, 255, 255, 0.05)", borderColor: "rgba(255, 255, 255, 0.15)" }}>
+                            {activeProfile.key}
+                          </span>
+                          <div className="flex flex-col min-w-0 justify-center pl-1">
+                            <h4 className="text-[12px] font-sans font-black text-white block leading-[1.3] py-0.5">
+                              {activeProfile.title}
+                            </h4>
+                            <span className="text-[7.5px] font-mono text-zinc-500 block leading-[1.2]">{activeProfile.englishTitle}</span>
+                          </div>
+                        </div>
+                        
+                        {/* Substring-based programmatic truncation to perfectly prevent canvas multi-line clipping */}
+                        <p className="text-[8.5px] font-semibold text-zinc-300 leading-normal font-sans mt-2 pb-1 select-text">
+                          “{activeProfile.description.length > 95 ? activeProfile.description.slice(0, 93) + "..." : activeProfile.description}”
+                        </p>
+                      </div>
+
+                      <div className="text-[6.5px] text-zinc-400 border-t pt-1 mt-1 font-sans flex justify-between items-center" style={{ borderTopColor: "rgba(161, 161, 170, 0.08)" }}>
+                        <span>主厨学者：<strong className="text-[#F3E0B5] font-bold">{artistName}</strong></span>
+                        <span>报告签批：学术资产</span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* 4. Speed Match compatibility & Pure HTML sharp vector QR container */}
+                  <div className="flex justify-between items-center z-10 relative pt-2 border-t w-full" style={{ borderTopColor: "rgba(161, 161, 170, 0.1)" }}>
+                    {/* Left Column compatibility with rigid explicit widths preventing layout overlaps on canvas */}
+                    <div className="w-[214px] shrink-0 space-y-1 text-left">
+                      <span className="text-[7.5px] font-sans text-zinc-400 font-bold block">
+                        🍴 COLLABORATIVE SPEED-DATING MATCH
+                      </span>
                       
-                      <div className="flex-1 min-w-0 p-1 px-1.5 rounded border" style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-                        <span className="text-red-400 block text-[6.5px] leading-normal pb-0.5">生化隐雷 ALERT ☣️</span>
-                        <span className="text-white block truncate text-[8.5px] max-w-[95px] leading-normal pb-1 font-semibold">{activeProfile.dangerMatchTitle.replace(/【|】/g, "")}</span>
+                      <div className="flex gap-2 text-[8px] font-black w-full">
+                        <div className="flex-1 min-w-0 p-1 px-1.5 rounded border" style={{ backgroundColor: "rgba(16, 185, 129, 0.05)", borderColor: "rgba(16, 185, 129, 0.2)" }}>
+                          <span className="text-emerald-400 block text-[6.5px] leading-normal pb-0.5">绝配天作 MATCH 🏆</span>
+                          <span className="text-white block truncate text-[8.5px] max-w-[90px] leading-normal pb-1 font-semibold">{activeProfile.bestMatchTitle.replace(/【|】/g, "")}</span>
+                        </div>
+                        
+                        <div className="flex-1 min-w-0 p-1 px-1.5 rounded border" style={{ backgroundColor: "rgba(239, 68, 68, 0.05)", borderColor: "rgba(239, 68, 68, 0.2)" }}>
+                          <span className="text-red-400 block text-[6.5px] leading-normal pb-0.5">生化隐雷 ALERT ☣️</span>
+                          <span className="text-white block truncate text-[8.5px] max-w-[90px] leading-normal pb-1 font-semibold">{activeProfile.dangerMatchTitle.replace(/【|】/g, "")}</span>
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Right Column QR code: EXTREMELY HIGH SHARPNESS EXPLICIT HTML MATRIX CELLS */}
+                    <div className="w-[100px] shrink-0 flex flex-col items-center justify-center p-1 bg-white rounded-lg border shadow-sm" style={{ borderColor: "rgba(161, 161, 170, 0.15)" }}>
+                      <PureHtmlQrCode />
+                      <span className="text-[7px] font-sans font-extrabold text-zinc-950 mt-1 tracking-tight whitespace-nowrap block">
+                        微信扫码 • 揭开理化
+                      </span>
                     </div>
                   </div>
 
-                  {/* Right Column QR code: EXTREMELY HIGH SHARPNESS EXPLICIT HTML MATRIX CELLS */}
-                  <div className="w-[98px] shrink-0 flex flex-col items-center justify-center p-1 bg-white rounded-lg border shadow-sm" style={{ borderColor: 'rgba(161, 161, 170, 0.15)' }}>
-                    <PureHtmlQrCode />
-                    <span className="text-[7px] font-sans font-extrabold text-zinc-950 mt-1 tracking-tight whitespace-nowrap block">
-                      微信扫码 • 揭开理化
-                    </span>
+                  {/* Footer and dynamic serial hash metadata */}
+                  <div className="flex justify-between text-[6.5px] text-zinc-500 font-mono pt-1 z-10 relative">
+                    <span>CHEF: {artistName.toUpperCase()} • MBTI_{cPositionExhibit.id.slice(-6).toUpperCase()}</span>
+                    <span>🗼 PARIS DE GASTRO-LOUVRE CNRS</span>
                   </div>
-                </div>
 
-                {/* Footer and dynamic serial hash metadata */}
-                <div className="flex justify-between text-[6.5px] text-zinc-500 font-mono pt-1 z-10 relative">
-                  <span>CHEF: {artistName.toUpperCase()} • MBTI_{cPositionExhibit.id.slice(-6).toUpperCase()}</span>
-                  <span>🗼 PARIS DE GASTRO-LOUVRE CNRS</span>
                 </div>
-
               </div>
             </div>
 
