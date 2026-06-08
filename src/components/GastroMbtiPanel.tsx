@@ -1121,6 +1121,104 @@ export const GastroMbtiPanel: React.FC<GastroMbtiPanelProps> = ({ exhibits }) =>
         </div>
       )}
 
+      {/* RENDER DYNAMIC FLUID MOBILE-FRIENDLY POSTER PREVIEW & LONG-PRESS SAVER MODAL */}
+      {generatedPosterSrc && (
+        <div id="mbti_mobile_save_modal" className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[100000] flex flex-col items-center justify-center p-4 overflow-y-auto select-none">
+          {/* Floating Close button */}
+          <button 
+            onClick={() => {
+              setGeneratedPosterSrc(null);
+              playTickSound();
+            }}
+            className="fixed top-4 right-4 z-[100001] p-3 rounded-full bg-zinc-900/90 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer shadow-lg active:scale-95 transition-all outline-none"
+            title="关闭 Close"
+          >
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+
+          <div className="max-w-md w-full bg-[#14151C] border border-zinc-800 rounded-2xl p-5 flex flex-col items-center space-y-4 shadow-[0_25px_60px_rgba(0,0,0,0.9)] relative animate-in fade-in zoom-in-95 duration-200 select-text">
+            
+            <div className="text-center w-full">
+              <span className="text-[10px] font-mono tracking-widest text-amber-400 font-extrabold uppercase">
+                ✦ GENERATION COMPLETED ✦
+              </span>
+              <h4 className="text-base font-serif font-black text-white italic mt-1 pb-1">
+                高维像素艺术海报已雕琢完毕
+              </h4>
+              
+              {/* High precision cross-platform guide card */}
+              <div className="mx-auto max-w-sm bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-xl p-3 text-center mt-2 space-y-1.5 select-none">
+                <p className="text-[11px] font-sans font-bold flex items-center justify-center gap-1.5 text-amber-400 leading-normal">
+                  <span className="text-sm">📱</span>
+                  <span><strong>手机端保存指引</strong> (Android / iOS)：</span>
+                </p>
+                <p className="text-[10px] font-sans font-medium text-zinc-300 leading-relaxed">
+                  请在下方图片上{' '}
+                  <strong className="text-amber-300 underline underline-offset-4 decoration-amber-500 font-black">
+                    长按并保持两秒
+                  </strong>
+                  ，在弹出的菜单中选择「<strong className="text-white font-bold">保存到相册</strong>」或「<strong className="text-white font-bold">发送给朋友</strong>」。
+                </p>
+                <div className="text-[9px] font-sans font-semibold text-zinc-550 border-t border-zinc-800 pt-1.5 mt-1.5 leading-normal flex items-center justify-center gap-1">
+                  <span>💻</span>
+                  <span className="text-zinc-400"><strong>电脑网页端：</strong>已自动执行下载，若被拦截可右键图片另存为。</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Core Poster Image container with pulsing user prompt decor for natural touch guides */}
+            <div className="w-[285px] h-[508px] shrink-0 bg-[#0C0D11] rounded-2xl overflow-hidden shadow-2xl border-2 border-solid border-zinc-800 flex items-center justify-center select-all relative group transition-all hover:border-amber-500/40">
+              <img 
+                src={generatedPosterSrc} 
+                className="w-full h-full object-contain cursor-pointer select-all" 
+                alt="Paris Louvre G-MBTI Fecal Science Report" 
+                referrerPolicy="no-referrer"
+              />
+              
+              {/* Pulsing micro prompt layout acting as an organic user coach */}
+              <div className="absolute inset-x-0 bottom-0 py-3 bg-gradient-to-t from-black via-black/90 to-transparent text-center pointer-events-none select-none">
+                <span className="text-[9.5px] text-amber-400 uppercase font-black tracking-widest animate-pulse flex items-center justify-center gap-1">
+                  💡 长按图片 唤出手机保存菜单 🕯️
+                </span>
+              </div>
+            </div>
+
+            {/* Functional manual bypass widgets */}
+            <div className="w-full flex gap-3 pt-1">
+              <button 
+                onClick={() => {
+                  try {
+                    const link = document.createElement("a");
+                    link.download = `Paris_Louvre_G-MBTI_Report_${activeProfile.key}.png`;
+                    link.href = generatedPosterSrc;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    playTickSound();
+                  } catch (err) {
+                    console.error("Manual fallback download invocation error:", err);
+                  }
+                }}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 active:from-amber-600 active:to-amber-700 text-amber-950 font-black text-xs cursor-pointer shadow border border-amber-300 select-none transition-all hover:scale-[1.02]"
+              >
+                再次触发文件下载
+              </button>
+              
+              <button 
+                onClick={() => {
+                  setGeneratedPosterSrc(null);
+                  playTickSound();
+                }}
+                className="flex-1 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-extrabold text-xs cursor-pointer border border-zinc-700 shadow select-none transition-all active:scale-95"
+              >
+                关闭预览 / Return
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
